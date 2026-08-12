@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root version="4.1" release="8.5">
+  <properties>
+    <n>FGU MCP Server Testing Extension</n>
+    <categoryname>Utility</categoryname>
+    <version>1.0</version>
+    <author>Rob McDougall</author>
+    <description>FGU Testing Extension for testing LUA scripts.</description>
+  </properties>
+
+  <base>
+    <script name="FguTestingScript" file="scripts/testing_script.lua"/>
+  </base>
+</root>
