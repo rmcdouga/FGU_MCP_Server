@@ -29,9 +29,14 @@ function cmdTestScript(sCommand, sParams)
 
 	local dbnRoot = DB.getRoot();
 	ChatManager.SystemMessage("[Testing Script] " .. tostring(dbnRoot.getChildCount()) .. " root objects found in database.")
-	ChatManager.SystemMessage("[Testing Script] NodeName '" .. dbnRoot.getNodeName() .. "', Name '" .. dbnRoot.getName() .. "', Module '" .. dbnRoot.getModule() .. "'.")
+	ChatManager.SystemMessage("[Testing Script] " .. tostring(DB.getChildCount(dbnRoot)) .. " root objects found in database.")
+	ChatManager.SystemMessage("[Testing Script] NodeName '" .. dbnRoot.getNodeName() .. "', Name '" .. dbnRoot.getName() .. "', Module '" .. dbnRoot.getModule() .. "', Path '" .. DB.getPath(dbnRoot) .. "'.")
+	ChatManager.SystemMessage("[Testing Script] Name '" .. DB.getName(DB.getRoot()) .. "', Module '" .. DB.getModule(DB.getRoot()) .. "', Path '" .. DB.getPath(DB.getRoot()) .. "'.")
+	ChatManager.SystemMessage("[Testing Script] Value '" .. tostring(DB.getText(DB.getRoot())) .. "'.")
 	local tModuleNPCs = dbnRoot.getChildren();
 	ChatManager.SystemMessage("[Testing Script] " .. #tModuleNPCs .. " root children found in database.")
+	local tRootNodeChildren = DB.getChildren(dbnRoot);
+	ChatManager.SystemMessage("[Testing Script] " .. #tRootNodeChildren .. " root children found in database via DB.")
 	local tModuleNpcCats = dbnRoot.getChildCategories();
 	ChatManager.SystemMessage("[Testing Script] " .. #tModuleNpcCats .. " root child categories found in database.")
 
