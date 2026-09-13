@@ -1,11 +1,15 @@
-package io.github.rmcdouga.fgumcpserver.text;
+package io.github.rmcdouga.fgumcpserver.text.domain;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class TextSanitizerTest {
+import io.github.rmcdouga.fgumcpserver.text.domain.ports.in.TextSanitizer;
+
+class FguTextSanitizerTest {
+
+	private TextSanitizer underTest = FguTextSanitizer.factory();
 
 	@ParameterizedTest
 	@CsvSource({"\uFB00, ff", 
@@ -15,7 +19,7 @@ class TextSanitizerTest {
 				"\uFB04, ffl"
 				})
 	void testSanitize_ligatures(String ligature, String expected) {
-		assertEquals(expected, TextSanitizer.sanitize(ligature));
+		assertEquals(expected, underTest.sanitize(ligature));
 	}
 
 	@ParameterizedTest
@@ -30,7 +34,7 @@ class TextSanitizerTest {
 					 "\u2019, '"
 					 })
 	void testSanitize_quotes(String unicodeQuote, String expected) {
-		assertEquals(expected, TextSanitizer.sanitize(unicodeQuote));
+		assertEquals(expected, underTest.sanitize(unicodeQuote));
 	}
 
 	@ParameterizedTest
@@ -38,6 +42,6 @@ class TextSanitizerTest {
 				"\u202f, ' '", 
 				})
 	void testSanitize_spaces(String specialSpace, String expected) {
-		assertEquals(expected, TextSanitizer.sanitize(specialSpace));
+		assertEquals(expected, underTest.sanitize(specialSpace));
 	}
 }

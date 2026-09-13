@@ -1,6 +1,8 @@
-package io.github.rmcdouga.fgumcpserver.text;
+package io.github.rmcdouga.fgumcpserver.text.domain;
 
 import java.text.Normalizer;
+
+import io.github.rmcdouga.fgumcpserver.text.domain.ports.in.TextSanitizer;
 
 /**
  * Santizes text by:
@@ -8,9 +10,9 @@ import java.text.Normalizer;
  *   2) converting ligatures to their constituent characters
  *   3) convert special spaces to basic space
  */
-public class TextSanitizer {
+public class FguTextSanitizer {
 	
-	static String sanitize(String textIn) {
+	static String staticSanitize(String textIn) {
 		return Normalizer.normalize(textIn, Normalizer.Form.NFKC)	// ligatures and special spaces
 				.replace("\u201C", "\"") 		// left double quote
 				.replace("\u201D", "\"") 		// right double quote
@@ -19,4 +21,7 @@ public class TextSanitizer {
 				;
 	}
 
+	public static TextSanitizer factory() {
+		return t->staticSanitize(t);
+	};
 }
