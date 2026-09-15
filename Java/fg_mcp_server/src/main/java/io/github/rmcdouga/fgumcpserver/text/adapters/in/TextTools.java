@@ -14,6 +14,6 @@ public class TextTools {
 
 	@McpTool(description = "Sanitize text for Fantasy Grounds.")
 	String sanitizeTextForFgu(String textIn) {
-		return textSanitizer.sanitize(textIn);
+		return "Sanitized version of the text is:\n%s".formatted(textSanitizer.sanitize(textIn));
 	}
 }
