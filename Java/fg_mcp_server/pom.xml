@@ -47,6 +47,7 @@
 		<java.version>25</java.version>
 		<spring-ai.version>2.0.0</spring-ai.version>
 		<spring-modulith.version>2.1.0</spring-modulith.version>
+		<jreleaser-plugin.version>1.26.0</jreleaser-plugin.version>
 	</properties>
 
 	<distributionManagement>
@@ -116,5 +117,100 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+	    <profile>
+			<!-- Profile for creating a "full" release for publication (with signed versions of sources and javadocs) -->
+	        <id>publication</id>
+ 			<properties>
+        	   	<altDeploymentRepository>local::file:${project.build.directory}/staging-deploy</altDeploymentRepository>
+            </properties>
+            <build>
+	            <plugins>
+	                <plugin>
+	                    <groupId>org.apache.maven.plugins</groupId>
+	                    <artifactId>maven-javadoc-plugin</artifactId>
+	                    <executions>
+	                        <execution>
+	                            <id>attach-javadocs</id>
+	                            <goals>
+	                                <goal>jar</goal>
+	                            </goals>
+	                            <configuration>
+	                                <attach>true</attach>
+	                            </configuration>
+	                        </execution>
+	                    </executions>
+	                </plugin>
+	                <plugin>
+	                    <groupId>org.apache.maven.plugins</groupId>
+	                    <artifactId>maven-source-plugin</artifactId>
+	                    <executions>
+	                        <execution>
+	                            <id>attach-sources</id>
+	                            <goals>
+	                                <goal>jar</goal>
+	                            </goals>
+	                            <configuration>
+	                                <attach>true</attach>
+	                            </configuration>
+	                        </execution>
+	                    </executions>
+	                </plugin>
+	            </plugins>
+	        </build>
+	    </profile>
+		<profile>
+			<!-- Profile for releasing code to Maven Central -->
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jreleaser</groupId>
+						<artifactId>jreleaser-maven-plugin</artifactId>
+						<version>${jreleaser-plugin.version}</version>
+						<inherited>false</inherited>
+						<configuration>
+							<gitRootSearch>true</gitRootSearch>
+							<dryrun>false</dryrun>
+							<jreleaser>
+								<release>
+									<github>
+										<owner>rmcdouga</owner>
+										<overwrite>true</overwrite>
+									</github>
+								</release>
+								<files>
+									<globs>
+										<glob>
+											<pattern>${project.build.directory}/staging-deploy/**/${project.artifactId}-${project.version}*.*</pattern>
+										</glob>
+									</globs>
+								</files>
+								<signing>
+									<pgp>
+										<active>ALWAYS</active>
+										<armored>true</armored>
+									</pgp>
+								</signing>
+								<deploy>
+									<maven>
+										<mavenCentral>
+											<release-deploy>
+												<active>RELEASE</active>
+												<applyMavenCentralRules>true</applyMavenCentralRules>
+												<url>https://central.sonatype.com/api/v1/publisher</url>
+												<stagingRepositories>${project.build.directory}/staging-deploy</stagingRepositories>
+											</release-deploy>
+										</mavenCentral>
+									</maven>
+								</deploy>
+							</jreleaser>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
