@@ -13,24 +13,55 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>fg_mcp_server</name>
 	<description>Fantasy Grounds MCP Server</description>
-	<url/>
+	<url>https://github.com/rmcdouga/FGU_MCP_Server</url>
+	<inceptionYear>2026</inceptionYear>
+
 	<licenses>
-		<license/>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
 	</licenses>
+
+	<organization>
+		<name>Rob McDougall</name>
+		<url>https://github.com/rmcdouga</url>
+	</organization>
+
 	<developers>
-		<developer/>
+		<developer>
+		    <id>rmcdouga</id>
+			<name>Rob McDougall</name>
+			<email>rmcdouga@gmail.com</email>
+		</developer>
 	</developers>
+
 	<scm>
-		<connection/>
-		<developerConnection/>
+		<connection>scm:git:https://github.com/rmcdouga/FGU_MCP_Server.git</connection>
+		<developerConnection>scm:git:https://github.com/rmcdouga/FGU_MCP_Server.git</developerConnection>
+		<url>https://github.com/rmcdouga/FGU_MCP_Server</url>
 		<tag/>
-		<url/>
 	</scm>
+
 	<properties>
 		<java.version>25</java.version>
 		<spring-ai.version>2.0.0</spring-ai.version>
 		<spring-modulith.version>2.1.0</spring-modulith.version>
 	</properties>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>github</id>
+			<name>GitHub Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/rmcdouga/FGU_MCP_Server</url>
+		</snapshotRepository>
+		<repository>
+			<id>github</id>
+			<name>GitHub Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/rmcdouga/FGU_MCP_Server</url>
+		</repository>
+	</distributionManagement>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
@@ -57,6 +88,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
