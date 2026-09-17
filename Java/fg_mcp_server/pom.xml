@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.rmcdouga.fgumcpserver</groupId>
 	<artifactId>fg_mcp_server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<name>fg_mcp_server</name>
 	<description>Fantasy Grounds MCP Server</description>
 	<url>https://github.com/rmcdouga/FGU_MCP_Server</url>
