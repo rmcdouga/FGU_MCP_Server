@@ -1,0 +1,10 @@
+{
+  "aliases": {
+    "fgu_mcp_server": {
+      "script-ref": "io.github.rmcdouga.fgumcpserver:fg_mcp_server:0.1.0",
+      "description": "Run Fantasy Grounds MCP Server",
+      "java": "25",
+      "enable-preview": false
+    }
+  }
+}
