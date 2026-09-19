@@ -24,6 +24,7 @@ The current feature set is very limited - just the following tool:
 The installation and running of the FGU MCP Server requires two steps:
 1. Install JBang
 2. Configure the MCP server in an AI Agent (such as Claude Code, Google AntiGravity, AnythingLLM, etc.)
+
 ### JBang Installation/Configuration
 [JBang](https://www.jbang.dev) is a utility that simplifies the running of Java programs.  It looks after managing the Java runtime for you.  It also manages the downloading of the FGU MCP Server code.
 
@@ -47,7 +48,7 @@ $env:JBANG_DEFAULT_JAVA_VERSION = "25"; jbang jdk default 25
 
 ### FGU MCP Server Configuration
 
-AI Agents typically all use the same configuration JSON format.  How you get to the file will vary from one agent to the next, however the entry for the launching the FGU MCP Server will be the same:
+AI Agents typically all use the same configuration JSON format.  How you get to the file will vary from one agent to the next, however the entry for launching the FGU MCP Server will be the same:
 
 ```json
 {
@@ -63,6 +64,7 @@ AI Agents typically all use the same configuration JSON format.  How you get to 
 }
 ```
 
+For instructions that are specific to particular Ai Agents, see the [AI Agent Configuration document](Docs/AiAgentConfiguration.md).
 
 ## Using the FGU MCP Server
 
