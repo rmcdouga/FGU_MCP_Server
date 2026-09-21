@@ -31,7 +31,6 @@ class SanitizeTextTests {
 	   	var result = chatClientBuilder.build()
    				.prompt()
    				.user(SANITIZE_TEXT_PROMPT.formatted(unsanitizedText))
-   				.options(ChatOptions.builder().temperature(0.0))	// Make the model deterministic for testing purposes
    				.call()
    				.content();
 	   	
@@ -44,7 +43,6 @@ class SanitizeTextTests {
 	   	var result = chatClientBuilder.build()
    				.prompt()
    				.user("What external tools or functions do you have access to?")
-   				.options(ChatOptions.builder().temperature(0.0))	// Make the model deterministic for testing purposes
    				.call()
    				.content();
 	   	

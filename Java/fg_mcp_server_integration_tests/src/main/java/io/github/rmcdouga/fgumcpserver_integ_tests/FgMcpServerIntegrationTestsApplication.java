@@ -9,6 +9,7 @@ import org.modeljars.ModelJars;
 import org.modeljars.ModelLoadOptions;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientBuilderCustomizer;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.ObjectProvider;
@@ -63,8 +64,13 @@ public class FgMcpServerIntegrationTestsApplication {
 	}
 	
     @Bean
+    ChatClientBuilderCustomizer setTemperature() {
+    	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
+    }
+	
+    @Bean
     ChatClientBuilderCustomizer addMcpTools(ToolCallbackProvider mcpToolCallbacks) {
-    	ToolCallback[] toolCallbacks = mcpToolCallbacks.getToolCallbacks();
+//    	ToolCallback[] toolCallbacks = mcpToolCallbacks.getToolCallbacks();
 //    	System.out.println("Adding MCP tools to ChatClient builder (%d tools):".formatted(toolCallbacks.length));
 //    	Arrays.stream(toolCallbacks)
 //    	 	.forEach(toolCallback -> System.out.println("  - Tool: " + toolCallback.getToolDefinition().name()));
