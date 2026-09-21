@@ -54,7 +54,20 @@
 			<artifactId>qwen.qwen3-1.7b-gguf.q8_0</artifactId>
 			<version>3.0.0-q8_0.2</version>
 		</dependency>
-
+		<!--
+		<dependency>
+			<groupId>org.modeljars.huggingface</groupId>
+			<artifactId>cactus-compute.needle2-cact.cq2_mixed</artifactId>
+			<version>2.0.0-cq2_mixed.2</version>
+		</dependency>
+		-->
+		<!--
+		<dependency>
+			<groupId>org.modeljars.huggingface</groupId>
+			<artifactId>qwen.qwen3-8b-gguf.q4_k_m</artifactId>
+			<version>3.0.0-q4_k_m.2</version>
+		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
