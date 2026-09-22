@@ -1,29 +1,41 @@
 package io.github.rmcdouga.fgumcpserver.fgu_data.adapters.out;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-
-import org.junit.jupiter.api.Test;
-
-import io.github.rmcdouga.fgumcpserver.fgu_data.adapters.out.FileSystemFguDataStore;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguCampaign;
+import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguDataStore;
 
 @DisplayName("FileSystemFguDataStore Tests")
 class FileSystemFguDataStoreTest {
 
 	@Test
 	@DisplayName("should construct with custom root path")
-	void testConstructorWithCustomPath() {
+	void testConstructorWithCustomPath(@TempDir Path tempDir) throws IOException {
 		// Arrange
-		Path customPath = Path.of("/custom/fantasy/grounds");
+		Path campaignsPath = tempDir.resolve("campaigns");
+		Path campaign1 = campaignsPath.resolve("campaign1");
+		Path campaign2 = campaignsPath.resolve("campaign2");
+		Files.createDirectories(campaign1);
+		Files.createDirectories(campaign2);
 
 		// Act
-		FileSystemFguDataStore store = new FileSystemFguDataStore(customPath);
+		FguDataStore datastore = new FileSystemFguDataStore(tempDir);
+		List<FguCampaign> campaigns = datastore.campaigns().toList();
 
 		// Assert
-		assertEquals(customPath, store.rootPath());
+		assertThat(campaigns).hasSize(2);
+		assertThat(campaigns).extracting(FguCampaign::name)
+				.containsExactlyInAnyOrder("campaign1", "campaign2");
 	}
 
 	@Test
@@ -33,8 +45,9 @@ class FileSystemFguDataStoreTest {
 		FileSystemFguDataStore store = new FileSystemFguDataStore();
 
 		// Assert
-		assertNotNull(store.rootPath());
-		assertTrue(store.rootPath().isAbsolute(), "Default root path should be absolute");
+		assertThat(store).isNotNull();
+		assertThat(store.rootPath()).isNotNull();
+		assertThat(store.rootPath()).isAbsolute();
 	}
 
 	@Test
@@ -45,19 +58,23 @@ class FileSystemFguDataStoreTest {
 
 		// Act
 		FileSystemFguDataStore store = new FileSystemFguDataStore();
-		String pathString = store.rootPath().toString();
 
 		// Assert
+		assertThat(store).isNotNull();
+		String pathString = store.rootPath().toString();
 		if (osName.contains("mac")) {
-			assertTrue(pathString.contains("SmiteWorks") && pathString.contains("Fantasy Grounds"),
-					"macOS path should contain 'SmiteWorks' and 'Fantasy Grounds'");
+			assertThat(pathString)
+				.as("macOS path should contain 'SmiteWorks' and 'Fantasy Grounds'")
+				.contains("SmiteWorks").contains("Fantasy Grounds");
 		} else if (osName.contains("windows")) {
-			assertTrue(pathString.contains("Fantasy Grounds"),
-					"Windows path should contain 'Fantasy Grounds'");
+			assertThat(pathString)
+				.as("Windows path should contain 'Fantasy Grounds'")
+				.contains("Fantasy Grounds");
 		} else {
 			// Linux and other systems
-			assertTrue(pathString.contains(".smiteworks"),
-					"Linux path should contain '.smiteworks'");
+			assertThat(pathString)
+				.as("Linux path should contain '.smiteworks'")
+				.contains(".smiteworks");
 		}
 	}
 
@@ -72,18 +89,9 @@ class FileSystemFguDataStoreTest {
 		String pathString = store.rootPath().toString();
 
 		// Assert
-		assertTrue(pathString.startsWith(userHome),
-				"Default root path should start with user home directory");
-	}
-
-	@Test
-	@DisplayName("should not return null for default path")
-	void testDefaultPathNotNull() {
-		// Act
-		FileSystemFguDataStore store = new FileSystemFguDataStore();
-
-		// Assert
-		assertNotNull(store.rootPath(), "Default root path should not be null");
+		assertThat(pathString)
+			.as("Default path should be within the user's home directory")
+			.startsWith(userHome);
 	}
 
 	@Test

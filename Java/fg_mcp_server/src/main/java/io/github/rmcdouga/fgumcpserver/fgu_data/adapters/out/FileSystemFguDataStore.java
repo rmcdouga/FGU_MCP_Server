@@ -1,11 +1,8 @@
 package io.github.rmcdouga.fgumcpserver.fgu_data.adapters.out;
 
-import java.awt.List;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -41,7 +38,10 @@ public class FileSystemFguDataStore implements FguDataStore {
 		try (Stream<Path> campaignDirs = Files.list(campaignsPath)) {
 			return campaignDirs
 					.filter(Files::isDirectory)
-					.map(path -> new FileSystemFguCampaign(path));
+					.map(path -> new FileSystemFguCampaign(path))
+					.map(FguCampaign.class::cast)
+					.toList()						// Collect to a list so that we can close the stream and handle any IO Exceptions before returning.
+					.stream();
 		} catch (IOException e) {
 			throw new FguDataStore.FguDataStoreException("Failed to list campaigns in " + campaignsPath, e);
 		}

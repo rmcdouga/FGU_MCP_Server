@@ -15,11 +15,16 @@ public class FguDataTools {
 
 	@McpTool(description = "List available Fantasy Grounds Campaigns.")
 	String listFguCampaigns() {
-		return "Available Fantasy Grounds Campaigns:\n%s".formatted(
-				fguData.campaigns()
-					   .map(c -> c.name())
-					   .collect(Collectors.joining("\n"))
-				);
+		try {
+			return "Available Fantasy Grounds Campaigns:\n%s".formatted(
+					fguData.campaigns()
+						   .map(c -> c.name())
+						   .collect(Collectors.joining("\n"))
+					);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "Error retrieving campaigns: %s".formatted(e.getMessage());
+		}
 	}
 
 }
