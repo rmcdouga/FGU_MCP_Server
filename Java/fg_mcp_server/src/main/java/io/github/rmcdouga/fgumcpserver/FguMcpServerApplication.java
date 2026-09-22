@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class FguMcpServerApplication {
+	public static final String APP_CFG_PREFIX = "fgumcpserver.";	// Prefix for application configuration properties.
 
 	private FguMcpServerApplication() {	// Private constructor to prevent instantiation.
 	}

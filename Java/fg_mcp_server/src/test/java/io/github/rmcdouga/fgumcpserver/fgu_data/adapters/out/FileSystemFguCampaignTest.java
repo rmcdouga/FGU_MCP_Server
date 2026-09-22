@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguCampaign;
 
-@DisplayName("FileSystemFguCamØpaign Tests")
+@DisplayName("FileSystemFguCampaign Tests")
 class FileSystemFguCampaignTest {
 	
 	Function<Path, FguCampaign> campaignFactory = FileSystemFguCampaign::new;

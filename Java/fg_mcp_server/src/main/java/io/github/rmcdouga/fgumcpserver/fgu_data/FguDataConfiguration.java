@@ -1,8 +1,13 @@
 package io.github.rmcdouga.fgumcpserver.fgu_data;
 
+import java.nio.file.Path;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.github.rmcdouga.fgumcpserver.FguMcpServerApplication;
 import io.github.rmcdouga.fgumcpserver.fgu_data.adapters.in.FguDataTools;
 import io.github.rmcdouga.fgumcpserver.fgu_data.adapters.out.FileSystemFguDataStore;
 import io.github.rmcdouga.fgumcpserver.fgu_data.domain.FguDataLogic;
@@ -16,6 +21,7 @@ import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguDataStore;
  */
 @Configuration
 public class FguDataConfiguration {
+	private static final String CFG_PREFIX = FguMcpServerApplication.APP_CFG_PREFIX + "data";	// Prefix for data-related configuration properties.
 
 	/**
 	 * Creates a bean for Fgu Data Tools.
@@ -27,6 +33,7 @@ public class FguDataConfiguration {
 	 * @return
 	 */
 	@Bean
+	@ConditionalOnBooleanProperty(name = CFG_PREFIX + ".enabled", havingValue = true, matchIfMissing = true)
 	FguDataTools fguDataTools(FguData fguData) {
 		return new FguDataTools(fguData);
 	}
@@ -52,7 +59,7 @@ public class FguDataConfiguration {
 	 * @return
 	 */
 	@Bean
-	FguDataStore fguDataStore() {
-		return new FileSystemFguDataStore();
+	FguDataStore fguDataStore(@Value("${" + CFG_PREFIX + ".fguBaseDir:}") String dataStorePath) {
+		return dataStorePath.isBlank() ? new FileSystemFguDataStore() : new FileSystemFguDataStore(Path.of(dataStorePath));
 	}
 }

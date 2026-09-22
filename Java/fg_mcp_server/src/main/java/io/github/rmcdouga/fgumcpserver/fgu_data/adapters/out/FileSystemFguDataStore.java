@@ -54,7 +54,7 @@ public class FileSystemFguDataStore implements FguDataStore {
 	 * 
 	 * @return the root path
 	 */
-	Path rootPath() {
+	public Path rootPath() {
 		return rootPath;
 	}
 
