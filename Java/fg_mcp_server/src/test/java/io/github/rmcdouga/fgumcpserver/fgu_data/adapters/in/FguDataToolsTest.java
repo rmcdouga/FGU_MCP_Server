@@ -43,7 +43,7 @@ class FguDataToolsTest {
 		when(mockFguData.campaigns()).thenReturn(Stream.empty());
 		
 		String result = underTest.listFguCampaigns();
-		assertThat(result).isEqualTo("Available Fantasy Grounds Campaigns:\n");
+		assertThat(result).isEqualTo("No Fantasy Grounds Campaigns available");
 	}
 
 }
