@@ -1,5 +1,6 @@
 package io.github.rmcdouga.fgumcpserver.fgu_data.adapters.in;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.ai.mcp.annotation.McpTool;
@@ -16,11 +17,14 @@ public class FguDataTools {
 	@McpTool(description = "List available Fantasy Grounds Campaigns.")
 	String listFguCampaigns() {
 		try {
-			return "Available Fantasy Grounds Campaigns:\n%s".formatted(
-					fguData.campaigns()
-						   .map(c -> c.name())
-						   .collect(Collectors.joining("\n"))
-					);
+			List<String> availableCampaigns = fguData.campaigns()
+													  .map(c -> c.name())
+													  .toList();
+			return availableCampaigns.isEmpty() 
+					? "No Fantasy Grounds Campaigns available"
+					: "Available Fantasy Grounds Campaigns:\n%s".formatted(
+							availableCampaigns.stream().collect(Collectors.joining("\n"))
+							);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error retrieving campaigns: %s".formatted(e.getMessage());
