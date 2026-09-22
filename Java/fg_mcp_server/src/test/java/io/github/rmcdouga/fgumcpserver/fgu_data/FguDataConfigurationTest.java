@@ -2,6 +2,8 @@ package io.github.rmcdouga.fgumcpserver.fgu_data;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -70,7 +72,7 @@ class FguDataConfigurationTest {
 			assertNotNull(context);
 			var fguDataStore = context.getBean(FguDataStore.class);
 			if (fguDataStore instanceof FileSystemFguDataStore fsStore) {
-				assertEquals("/foo/bar", fsStore.rootPath().toString());
+				assertEquals(Path.of("/foo/bar"), fsStore.rootPath());
 			} else {
 				fail("Expected FguDataStore to be an instance of FileSystemFguDataStore");
 			}
