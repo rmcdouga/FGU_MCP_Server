@@ -27,6 +27,9 @@ class ListCampaignsTests {
 		registry.add("spring.ai.mcp.client.stdio.connections.fg_mcp_server_integration_tests.args", ()->constructArgs());
 	}
 
+	// TODO:  Alter this to find latest snapshot version
+	// TODO:  Alter this t alter other setting to adjust for different platforms (Windows, Linux, MacOS)
+	// TODO:  Use in all tests
 	static String constructArgs() {
 		return "run,--java=25,-Dfgumcpserver.data.fguBaseDir=" + tempDir + ",../fg_mcp_server/target/fg_mcp_server-0.2.0-SNAPSHOT.jar";
 	}
