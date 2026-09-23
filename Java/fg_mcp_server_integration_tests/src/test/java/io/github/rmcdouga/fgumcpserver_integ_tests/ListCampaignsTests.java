@@ -18,8 +18,8 @@ import org.springframework.test.context.DynamicPropertySource;
 class ListCampaignsTests {
 	private static Path tempDir;
 	
-	ListCampaignsTests(@TempDir Path tempDir) {
-		tempDir = tempDir.toAbsolutePath();
+	ListCampaignsTests(@TempDir Path junitTempDir) {
+		tempDir = junitTempDir.toAbsolutePath();
 	}
 
 	@DynamicPropertySource
@@ -33,6 +33,7 @@ class ListCampaignsTests {
 	static String constructArgs() {
 		return "run,--java=25,-Dfgumcpserver.data.fguBaseDir=" + tempDir + ",../fg_mcp_server/target/fg_mcp_server-0.2.0-SNAPSHOT.jar";
 	}
+
 	@Test
 	void testListCampaigns(@Autowired ChatClient.Builder chatClientBuilder) throws IOException {
 		Files.createDirectories(tempDir.resolve("campaigns").resolve("campaign1"));
