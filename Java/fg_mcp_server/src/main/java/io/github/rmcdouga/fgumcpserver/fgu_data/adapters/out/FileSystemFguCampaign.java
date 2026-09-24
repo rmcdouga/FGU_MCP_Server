@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguCampaign;
+import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguImagesStore;
 
 /**
  * An implementation of the {@link FguCampaign} interface that represents a campaign stored in the file system. 
@@ -26,6 +27,11 @@ public class FileSystemFguCampaign implements FguCampaign {
 	@Override
 	public String name() {
 		return campaignRootPath.getFileName().toString();
+	}
+
+	@Override
+	public FguImagesStore imagesStore() {
+		return new FileSystemFguImagesStore(campaignRootPath.resolve(FileSystemFguImagesStore.IMAGES_DIR_NAME));
 	}
 
 }

@@ -7,6 +7,13 @@ public interface FguCampaign {
 	 * 
 	 * @return
 	 */
-	public String name();
+	String name();
+	
+	/**
+	 * Returns the FguImagesStore for this campaign.
+	 * 
+	 * @return
+	 */
+	FguImagesStore imagesStore();
 
 }

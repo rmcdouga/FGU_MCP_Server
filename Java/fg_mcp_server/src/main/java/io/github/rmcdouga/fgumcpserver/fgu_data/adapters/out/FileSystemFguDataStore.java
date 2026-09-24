@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguCampaign;
 import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguDataStore;
+import io.github.rmcdouga.fgumcpserver.fgu_data.domain.ports.out.FguImagesStore;
 
 public class FileSystemFguDataStore implements FguDataStore {
 	private static final String MACOS_APP_DIR = "SmiteWorks";
@@ -79,5 +80,10 @@ public class FileSystemFguDataStore implements FguDataStore {
 			// Linux and other systems
 			return Path.of(userHome, LINUX_APP_DIR);
 		}
+	}
+
+	@Override
+	public FguImagesStore imagesStore() {
+		return new FileSystemFguImagesStore(rootPath.resolve(FileSystemFguImagesStore.IMAGES_DIR_NAME));
 	}
 }
