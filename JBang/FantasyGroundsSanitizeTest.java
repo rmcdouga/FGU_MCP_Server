@@ -1,6 +1,7 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 
 //DEPS org.junit.jupiter:junit-jupiter-engine:6.1.3
+//DEPS org.junit.jupiter:junit-jupiter-params:6.1.3
 //DEPS org.junit.platform:junit-platform-console:6.1.3
 
 //SOURCES FantasyGroundsSanitize.java
@@ -16,14 +17,16 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.console.ConsoleLauncher;
 
 public class FantasyGroundsSanitizeTest {
 
     @Test
     public void testSanitizeReplacesCurlyQuotesAndSpecialSpaces() {
-        String input = "This is “text” with a non-breaking\u00A0space and ‘single’ quotes.";
-        String expected = "This is \"text\" with a non-breaking space and 'single' quotes.";
+        String input = "This is “text” with a non-breaking\u00A0space and ‘single’ quotes.\nThis is a second line.";
+        String expected = "This is \"text\" with a non-breaking space and 'single' quotes.\nThis is a second line.";
 
         assertEquals(expected, FantasyGroundsSanitize.sanitize(input));
     }
@@ -75,6 +78,31 @@ public class FantasyGroundsSanitizeTest {
                 .getTransferData(DataFlavor.stringFlavor);
 
         assertEquals(expected, result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "--stdin", ""})
+    public void testStdinRoundTripSanitizesText() throws Exception {
+        String input = "This is “text” with ‘quotes’ and a non-breaking\u00A0space.";
+        String expected = "This is \"text\" with 'quotes' and a non-breaking space.";
+
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "jbang",
+                "FantasyGroundsSanitize.java",
+                "--stdin")
+                .directory(new File("."));
+
+        processBuilder.redirectInput(java.lang.ProcessBuilder.Redirect.PIPE);
+
+        Process process = processBuilder.start();
+        process.getOutputStream().write(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        process.getOutputStream().close();
+
+        int exitCode = process.waitFor();
+        assertEquals(0, exitCode, "Stdin sanitization command should exit successfully.");
+
+        byte[] resultBytes = process.getInputStream().readAllBytes();
+        assertEquals(expected, new String(resultBytes, java.nio.charset.StandardCharsets.UTF_8));
     }
 
     public static void main(final String... args) {
