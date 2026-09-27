@@ -5,6 +5,12 @@
       "description": "Run Fantasy Grounds MCP Server",
       "java": "25",
       "enable-preview": false
-    }
+    },
+	"fgu_sanitize": {
+	  "script-ref": "https://github.com/rmcdouga/FGU_MCP_Server/blob/main/JBang/FantasyGroundsSanitize.java",
+	  "description": "Sanitize text for Fantasy Grounds",
+	  "java": "25",
+	  "enable-preview": false
+	}
   }
 }
