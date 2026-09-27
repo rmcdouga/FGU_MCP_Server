@@ -12,6 +12,7 @@ It is expected that more tools will be added over time - including more sophisti
   - [JBang Installation/Configuration](#jbang-installationconfiguration)
   - [FGU MCP Server Configuration](#fgu-mcp-server-configuration)
 - [Using the FGU MCP Server](#using-the-fgu-mcp-server)
+- [Standalone "Sanitize Text" JBang Script](#standalone-sanitize-text-jbang-script)
 
 ## Features
 
@@ -77,3 +78,24 @@ Here is an example of such a prompt:
 
 
 You may be able to get away with more concise requests (such as just "sanitize this text"), depending on your current context, but including "sanitize text for Fantasy Grounds" should ensure that the correct tool is called.
+
+## Standalone "Sanitize Text" JBang Script
+
+This repo also contains a standalone JBang script that will read text from `stdin`, sanitize the text for Fantasy Grounds, and write
+the sanitized text to `stdout`.
+
+To invoke this script use the following command:
+
+```bash
+jbang fgu_sanitize@rmcdouga/FGU_MCP_Server
+```
+
+You may be prompted for permission to trust the script from this GitHub repo. You must trust it for it to run, but the source code 
+is [available here](/JBang/FantasyGroundsSanitize.java).
+
+Alternatively, the script can be run with the `--clipboard` parameter to have it read the text from the user's clipboard and 
+replace the text on the clipboard with a sanitized version.  This is what that command would look like:
+
+```bash
+jbang fgu_sanitize@rmcdouga/FGU_MCP_Server --clipboard
+```
