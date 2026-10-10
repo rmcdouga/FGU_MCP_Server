@@ -51,6 +51,28 @@ Example:
 - No automatic retries.
 - Manual retry only, max one retry per failed step, after rerunning preflight.
 
+## Mandatory safety rules
+
+These are enforced on every side-effecting command (see `SKILL.md` for full text):
+
+### Grounding
+- Every target name and coordinate MUST be observed from the current screenshot.
+- Never treat any name, label, or example in this skill's documentation as an observed UI element. A name that appears only in the docs is NOT a valid target.
+- The plan must quote the observed target with its source, e.g. "resolved target: '<label>' observed at (x,y) in <screenshot path>".
+
+### Target resolution
+- Resolve the target ONCE from the current screenshot using a vision-capable subagent that returns a structured box {x, y, w, h}.
+- Do NOT read the PNG inline and guess coordinates.
+- Do NOT call peekaboo-analyze (no API key configured; it will always fail).
+- Do NOT infer the target from the currently highlighted/selected row. A highlighted row is never a valid target for start_session.
+- If no coordinate can be produced from a verifiable source, FAIL FAST. Never guess. Never click a highlighted row. Ask the user for coordinates.
+
+### Loop prevention
+- Max 3 locate-click-observe attempts per action; stop and return a fail-fast report if the success signal is not met.
+- No-progress detection: if the after-state (screenshot hash, element id, or window title) is unchanged, stop — do not click again.
+- Single target lock: resolve the target ONCE and record its bounding box; do not re-locate on every iteration.
+- Idempotency: a click whose post-state equals its pre-state is not a success. Never repeat it.
+
 ## Troubleshooting
 
 - If preflight fails, fix the reported prerequisite and rerun.

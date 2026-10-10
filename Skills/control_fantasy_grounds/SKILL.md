@@ -101,7 +101,8 @@ The run is complete only when one of these is true:
 
 ## Launching Fantasy Grounds Application
 
-Fantasy Grounds application can be found here: `/Applications/SmiteWorks/Fantasy Grounds/FantasyGrounds.app`
+- Fantasy Grounds application can be found here: `/Applications/SmiteWorks/Fantasy Grounds/FantasyGrounds.app`
+- If, after launching, the application shows an "UPDATE AVAILABLE" button, click on the button to perform an update.  Wait for the update to finish and the Fantasy Grounds application to re-launch itself.
 
 ## Finding Fantasy Grounds PID
 
@@ -114,9 +115,31 @@ ps -A | grep SmiteWorks | grep -v 'grep'
 ## Controlling Fantasy Grounds
 
 - Fantasy Grounds is a Unity application and does not have any accessibility information.
-- Use the peekaboo tool to control Fantasy Grounds
+- Use the peekaboo tool to control Fantasy Grounds.
 - All interactions must be accomplished using the following steps:
-	- Capture a screenshot
-	- Use a subagent to locate the bounding box of the target UI element
-	- Send a click element to the coordinates at the center of the bounding box to activate the target UI element
+	- Capture a screenshot using the peekaboo-image tool with retina true, saving to an explicit path.
+	- Resolve the target ONCE using the mandatory Target resolution method below (a vision-capable subagent that returns a structured bounding box). Do NOT read the PNG inline and guess coordinates.
+	- Send a click to the coordinates at the center of the resolved bounding box to activate the target UI element.
+
+## Grounding (mandatory)
+
+- Every target name and coordinate MUST be observed from the current screenshot.
+- Never treat any name, label, or example that appears in this skill's documentation as an observed UI element. A name that appears only in the docs is NOT a valid target.
+- The plan must quote the observed target with its source, e.g. "resolved target: '<label>' observed at (x,y) in <screenshot path>".
+
+## Target resolution (mandatory)
+
+- Resolve the target ONCE from the current screenshot using a vision-capable subagent that returns a structured box {x, y, w, h}.
+- Do NOT read the PNG inline and guess coordinates.
+- Do NOT call peekaboo-analyze (no API key configured; it will always fail).
+- Do NOT infer the target from the currently highlighted/selected row. A highlighted row is never a valid target for start_session.
+- If no coordinate can be produced from a verifiable source, FAIL FAST. Never guess. Never click a highlighted row. Ask the user for coordinates.
+
+## Loop Prevention (mandatory)
+
+- Max attempts: at most 3 locate-click-observe attempts per action. After 3 attempts without the success signal, stop and return a fail-fast report.
+- No-progress detection: capture a before- and after-snapshot for each click. If the after-state (screenshot hash, located element id, or window title) is unchanged, treat it as a no-progress failure and stop — do not click again.
+- Single target lock: resolve the target UI element ONCE at the start of the cycle and record its bounding box. Do not re-locate the same element on every iteration. If the target cannot be resolved, fail fast instead of guessing.
+- Idempotency: a click whose post-state equals its pre-state is not a success. Never repeat such a click.
+- No AI analysis: never call peekaboo-analyze. It requires an API key that is not configured and will always fail.
    
