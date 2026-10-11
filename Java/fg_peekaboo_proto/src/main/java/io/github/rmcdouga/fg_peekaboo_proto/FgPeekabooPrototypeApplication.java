@@ -4,6 +4,7 @@ import static org.modeljars.catalog.Qwen3_1_7b_Q8_0.MODEL;
 //import static org.modeljars.catalog.Cactus_Compute_Needle2_Cact_Cq2_Mixed.MODEL;
 //import static org.modeljars.catalog.Qwen3_8b_Q4_K_M.MODEL;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -94,31 +95,10 @@ public class FgPeekabooPrototypeApplication {
     @Bean
     ApplicationRunner callPeekabooDirectly(List<McpSyncClient> mcpClients) {
         return _ -> {
-            for (McpSyncClient client : mcpClients) {
-                System.out.println("\n=== Direct MCP call (no model) ===");
-
-                // 1. List all tools exposed by this tool
-                String serverName = client.getServerInfo().name();
-                List<Tool> tools = client.listTools().tools();
-				System.out.println("Available %s tools (%d):".formatted(serverName, tools.size()));
-                tools.forEach(tool ->
-                    System.out.println("  - " + tool.name() ));// + ": " + tool.description()));
-
-                // 2. Call the 'app_list' tool directly
-//                System.out.println("\nCalling 'image' tool directly...");
-                
-//                var result = client.callTool(
-//                    new McpSchema.CallToolRequest("app_list", Map.of()));
-
-//                System.out.println("isError: " + result.isError());
-//                result.content().forEach(content -> {
-//                    if (content instanceof McpSchema.TextContent textContent) {
-//                        System.out.println(textContent.text());
-//                    } else {
-//                        System.out.println(content);
-//                    }
-//                });
-            }
+        	PeekabooMcpClient peekabooClient = PeekabooMcpClient.find(mcpClients);
+			System.out.println("Calling 'image' tool on PeekabooMcpClient...");
+			peekabooClient.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(FantasyGroundsApp.processId()), PeekabooMcpClient.ImageFormat.PNG, PeekabooMcpClient.ImageScale.NATIVE, Path.of("peekaboo_screenshot.png"));
+			System.out.println("Screenshot saved to 'peekaboo_screenshot.png'");
         };
     }
 
