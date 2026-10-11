@@ -5,6 +5,8 @@ import static org.modeljars.catalog.Qwen3_1_7b_Q8_0.MODEL;
 //import static org.modeljars.catalog.Qwen3_8b_Q4_K_M.MODEL;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.modeljars.ModelBackend;
 import org.modeljars.ModelJars;
@@ -23,6 +25,9 @@ import org.springframework.context.annotation.Bean;
 
 import com.integrallis.models.api.SamplingOptions;
 import com.integrallis.models.spring.ai.ModelsSpringAiChatModel;
+import io.modelcontextprotocol.client.McpSyncClient;
+import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.Tool;
 
 @SpringBootApplication
 public class FgPeekabooPrototypeApplication {
@@ -74,7 +79,7 @@ public class FgPeekabooPrototypeApplication {
 	
     @Bean
     ApplicationRunner printMcpBeans(ApplicationContext ctx) {
-        return args -> {
+        return _ -> {
             System.out.println("Beans with 'mcp' in their class name:");
             for (String name : ctx.getBeanDefinitionNames()) {
                 Object bean = ctx.getBean(name);
@@ -82,6 +87,37 @@ public class FgPeekabooPrototypeApplication {
                 if (className.toLowerCase().contains("mcp")) {
                     System.out.println("  - " + name + " (" + className + ")");
                 }
+            }
+        };
+    }
+
+    @Bean
+    ApplicationRunner callPeekabooDirectly(List<McpSyncClient> mcpClients) {
+        return _ -> {
+            for (McpSyncClient client : mcpClients) {
+                System.out.println("\n=== Direct MCP call (no model) ===");
+
+                // 1. List all tools exposed by this tool
+                String serverName = client.getServerInfo().name();
+                List<Tool> tools = client.listTools().tools();
+				System.out.println("Available %s tools (%d):".formatted(serverName, tools.size()));
+                tools.forEach(tool ->
+                    System.out.println("  - " + tool.name() ));// + ": " + tool.description()));
+
+                // 2. Call the 'app_list' tool directly
+//                System.out.println("\nCalling 'image' tool directly...");
+                
+//                var result = client.callTool(
+//                    new McpSchema.CallToolRequest("app_list", Map.of()));
+
+//                System.out.println("isError: " + result.isError());
+//                result.content().forEach(content -> {
+//                    if (content instanceof McpSchema.TextContent textContent) {
+//                        System.out.println(textContent.text());
+//                    } else {
+//                        System.out.println(content);
+//                    }
+//                });
             }
         };
     }
