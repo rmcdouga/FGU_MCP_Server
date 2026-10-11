@@ -31,9 +31,9 @@
 		<spring-ai.version>2.0.1</spring-ai.version>
 		<modeljars.version>0.1.31</modeljars.version>
 		<models-spring-ai.version>0.3.26</models-spring-ai.version>
-		<qwen3-1.7b-q8_0.version>3.0.0-q8_0.2</qwen3-1.7b-q8_0.version>
-		<cactus-needle2-cq2-mixed.version>2.0.0-cq2_mixed.2</cactus-needle2-cq2-mixed.version>
-		<qwen3-8b-q4_k_m.version>3.0.0-q4_k_m.2</qwen3-8b-q4_k_m.version>
+		<qwen3-1.version>3.0.0-q8_0.2</qwen3-1.version>
+		<needle2.version>2.0.0-cq2_mixed.2</needle2.version>
+		<qwen3-8.version>3.0.0-q4_k_m.2</qwen3-8.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -57,20 +57,20 @@
 		<dependency>
 			<groupId>org.modeljars.huggingface</groupId>
 			<artifactId>qwen.qwen3-1.7b-gguf.q8_0</artifactId>
-			<version>${qwen3-1.7b-q8_0.version}</version>
+			<version>${qwen3-1.version}</version>
 		</dependency>
 		<!--
 		<dependency>
 			<groupId>org.modeljars.huggingface</groupId>
 			<artifactId>cactus-compute.needle2-cact.cq2_mixed</artifactId>
-			<version>${cactus-needle2-cq2-mixed.version}</version>
+			<version>${needle2-cact-cq2-mixed.version}</version>
 		</dependency>
 		-->
 		<!--
 		<dependency>
 			<groupId>org.modeljars.huggingface</groupId>
 			<artifactId>qwen.qwen3-8b-gguf.q4_k_m</artifactId>
-			<version>${qwen3-8b-q4_k_m.version}</version>
+			<version>${qwen3-8.version}</version>
 		</dependency>
 		-->
 		<dependency>
