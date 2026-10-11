@@ -25,8 +25,8 @@ public class FantasyGroundsSanitizeTest {
 
     @Test
     public void testSanitizeReplacesCurlyQuotesAndSpecialSpaces() {
-        String input = "This is “text” with a non-breaking\u00A0space and ‘single’ quotes.\nThis is a second line.";
-        String expected = "This is \"text\" with a non-breaking space and 'single' quotes.\nThis is a second line.";
+        String input = "This is “text” with a non-breaking\u00A0space and ‘single’ quotes.\nThis is a second line and a ligature (\uFB00).";
+        String expected = "This is \"text\" with a non-breaking space and 'single' quotes.\nThis is a second line and a ligature (ff).";
 
         assertEquals(expected, FantasyGroundsSanitize.sanitize(input));
     }
