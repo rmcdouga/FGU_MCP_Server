@@ -1,21 +1,22 @@
 package io.github.rmcdouga.fg_peekaboo_proto;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.content.Media;
 import org.springframework.util.MimeType;
 
 public class UiLocator {
+	private static final Logger log = LoggerFactory.getLogger(UiLocator.class);
 	
 	public record ButtonClickLocation(int x, int y) {
 		public static ButtonClickLocation fromBoundingBox(int xmin, int ymin, int xmax, int ymax) {
-			System.out.println("Button Location: " + xmin + "," + ymin + " xmax: " + xmax + " ymax: " + ymax);
+			log.atDebug().log("Button Location: {}, {}, xmax: {}, ymax {}", xmin, ymin, xmax, ymax);
 			int centerX = (xmin + xmax) / 2;
 			int centerY = (ymin + ymax) / 2;
 			return new ButtonClickLocation(centerX, centerY);
@@ -55,8 +56,8 @@ public class UiLocator {
 					  					  			 									  .validateSchema()
 					  					  			);
 			
-		System.out.println("Model response: " + (result == null ? "null" : result.toString()));
-		System.out.println("Model response (pixels): " + from1000(result.xmin,3176) + "," + from1000(result.ymin,1924) + "," + from1000(result.xmax,3176) + "," + from1000(result.ymax,1924));
+		log.atDebug().log(()->"Model response: {}" + (result == null ? "null" : result.toString()));
+		log.atDebug().log(()->"Model response (pixels): " + from1000(result.xmin,3176) + "," + from1000(result.ymin,1924) + "," + from1000(result.xmax,3176) + "," + from1000(result.ymax,1924));
 		return ButtonClickLocation.fromBoundingBox(from1000(result.xmin,3176), from1000(result.ymin,1924), from1000(result.xmax,3176), from1000(result.ymax,1924));
 	}
 
@@ -73,13 +74,6 @@ public class UiLocator {
 	private int from1000(int value, int maxValue) {
 		return value * maxValue / 1000;
 	}
+
 	
-	private URL toUrl(Path uiScreenshotPath) {
-		try {
-			return uiScreenshotPath.toAbsolutePath().toUri().toURL();
-		} catch (MalformedURLException e) {
-			// Should never happen, but if it does, wrap it in a runtime exception
-			throw new IllegalStateException("Failed to convert screenshot path to URL: " + uiScreenshotPath, e);
-		}
-	}
 }
