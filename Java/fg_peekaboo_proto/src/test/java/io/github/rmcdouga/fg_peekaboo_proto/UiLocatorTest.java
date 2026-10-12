@@ -1,10 +1,15 @@
 package io.github.rmcdouga.fg_peekaboo_proto;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.FieldSource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientBuilderCustomizer;
 import org.springframework.ai.chat.prompt.ChatOptions;
@@ -17,14 +22,30 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 
+import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class UiLocatorTest {
 
-	@Test
-	void testLocateButton(@Autowired UiLocator uiLocator) {
+	static final List<Arguments> BUTTONS = List.of(
+			Arguments.of("MY CAMPAIGNS", 820, 80, 1580, 220),
+			Arguments.of("UPDATE AVAILABLE", 482, 1326, 2694, 1384)
+	);
+	
+	@ParameterizedTest
+	@FieldSource("BUTTONS")
+	void testLocateButton(String buttonName, int expectedXmin, int expectedYmin, int expectedXmax, int expectedYmax, @Autowired UiLocator uiLocator) {
 		// This test is a placeholder to ensure that the UiLocator bean is created successfully
 		assertNotNull(uiLocator);
-		uiLocator.locateButton("MY CAMPAIGNS", Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png"));
+		ButtonClickLocation buttonLocation = uiLocator.locateButton(buttonName, Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png"));
+		System.out.println(buttonName +" button Location: " + buttonLocation);
+		assertNotNull(buttonLocation);
+		assertThat(buttonLocation.x())
+			.as("Button click X coordinate must be inside the button min/max")
+			.isBetween(expectedXmin, expectedXmax);
+		assertThat(buttonLocation.y())
+			.as("Button click Y coordinate must be inside the button min/max")
+			.isBetween(expectedYmin, expectedYmax);
 	}
 
 	@SpringBootApplication()
