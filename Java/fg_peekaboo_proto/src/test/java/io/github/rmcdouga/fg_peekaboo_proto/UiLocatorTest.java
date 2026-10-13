@@ -1,15 +1,16 @@
 package io.github.rmcdouga.fg_peekaboo_proto;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.FieldSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -31,18 +32,20 @@ class UiLocatorTest {
 	private static final Logger log = LoggerFactory.getLogger(UiLocatorTest.class);
 	private static final Path UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png");
 
-	static final List<Arguments> BUTTONS = List.of(
-			Arguments.of("MY CAMPAIGNS", 820, 80, 1580, 220),
-			Arguments.of("UPDATE AVAILABLE", 482, 1326, 2694, 1384)
-	);
-	
 	@ParameterizedTest
-	@FieldSource("BUTTONS")
+	@CsvSource({
+		"MY CAMPAIGNS, 820, 80, 1580, 220",
+		"UPDATE AVAILABLE, 482, 1326, 2694, 1384"
+	})
 	void testLocateButton(String buttonName, int expectedXmin, int expectedYmin, int expectedXmax, int expectedYmax, @Autowired UiLocator uiLocator) {
-		// This test is a placeholder to ensure that the UiLocator bean is created successfully
+		// Arrange
 		assertNotNull(uiLocator);
-		ButtonClickLocation buttonLocation = uiLocator.locateButton(buttonName, UPDATE_AVAILABLE_SCREENSHOT_PATH);
+		
+		// Act
+		ButtonClickLocation buttonLocation = uiLocator.locateButton(buttonName, UPDATE_AVAILABLE_SCREENSHOT_PATH).orElseThrow();
 		log.atDebug().log(()->buttonName +" button Location: " + buttonLocation);
+		
+		// Assert
 		assertNotNull(buttonLocation);
 		assertThat(buttonLocation.x())
 			.as("Button click X coordinate must be inside the button min/max")
@@ -52,6 +55,32 @@ class UiLocatorTest {
 			.isBetween(expectedYmin, expectedYmax);
 	}
 
+	@Test 
+	void testLocateButtonWithInvalidButtonName(@Autowired UiLocator uiLocator) {
+		// Arrange
+		assertNotNull(uiLocator);
+		
+		// Act
+		Optional<ButtonClickLocation> buttonLocation = uiLocator.locateButton("INVALID BUTTON NAME", UPDATE_AVAILABLE_SCREENSHOT_PATH);
+		
+		// Assert
+		assertThat(buttonLocation)
+			.as("Button coordinate must be empty when the button is not found")
+			.isEmpty();
+	}
+	
+	@Test
+	void testIsButtonPresentInvalidScreenshot(@Autowired UiLocator uiLocator) {
+		// Arrange
+		String nonExistentFilename = "NonExistentScreenshot.png";
+		assertNotNull(uiLocator);
+		
+		// Act & Assert
+		assertThatExceptionOfType(UncheckedIOException.class)
+			.isThrownBy(()->uiLocator.locateButton("MY CAMPAIGNS", Path.of(nonExistentFilename)))
+			.withMessageContaining("NonExistentScreenshot.png");
+	}
+	
 	@SpringBootApplication()
 	@ComponentScan(excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = FgPeekabooPrototypeApplication.class))
 	static class TestApplication {
