@@ -31,13 +31,14 @@ import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
 class UiLocatorTest {
 	private static final Logger log = LoggerFactory.getLogger(UiLocatorTest.class);
 	private static final Path UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png");
+	private static final Path NO_UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithoutUpdate.png");
 
 	@ParameterizedTest
 	@CsvSource({
 		"MY CAMPAIGNS, 820, 80, 1580, 220",
 		"UPDATE AVAILABLE, 482, 1326, 2694, 1384"
 	})
-	void testLocateButton(String buttonName, int expectedXmin, int expectedYmin, int expectedXmax, int expectedYmax, @Autowired UiLocator uiLocator) {
+	void testLocateButton_UpdateAvailable(String buttonName, int expectedXmin, int expectedYmin, int expectedXmax, int expectedYmax, @Autowired UiLocator uiLocator) {
 		// Arrange
 		assertNotNull(uiLocator);
 		
@@ -53,6 +54,37 @@ class UiLocatorTest {
 		assertThat(buttonLocation.y())
 			.as("Button click Y coordinate must be inside the button min/max")
 			.isBetween(expectedYmin, expectedYmax);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"MY CAMPAIGNS, 820, 80, 1580, 220",
+		"UPDATE AVAILABLE, 0, 0, 0, 0"
+	})
+	void testLocateButton_NoUpdateAvailable(String buttonName, int expectedXmin, int expectedYmin, int expectedXmax, int expectedYmax, @Autowired UiLocator uiLocator) {
+		// Arrange
+		assertNotNull(uiLocator);
+		
+		// Act
+		Optional<ButtonClickLocation> buttonLocation = uiLocator.locateButton(buttonName, NO_UPDATE_AVAILABLE_SCREENSHOT_PATH);
+		
+		// Assert
+		if (expectedXmin == 0 && expectedYmin == 0 && expectedXmax == 0 && expectedYmax == 0) {
+			assertThat(buttonLocation)
+				.as("Button coordinate must be empty when the button is not found")
+				.isEmpty();
+			return;
+		} else {
+			assertThat(buttonLocation)
+				.as("Button coordinate must be present when the button is found")
+				.isPresent();
+				assertThat(buttonLocation.get().x())
+					.as("Button click X coordinate must be inside the button min/max")
+					.isBetween(expectedXmin, expectedXmax);
+				assertThat(buttonLocation.get().y())
+					.as("Button click Y coordinate must be inside the button min/max")
+					.isBetween(expectedYmin, expectedYmax);
+		}
 	}
 
 	@Test 
@@ -80,24 +112,25 @@ class UiLocatorTest {
 			.isThrownBy(()->uiLocator.locateButton("MY CAMPAIGNS", Path.of(nonExistentFilename)))
 			.withMessageContaining("NonExistentScreenshot.png");
 	}
-	
-	@SpringBootApplication()
-	@ComponentScan(excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = FgPeekabooPrototypeApplication.class))
-	static class TestApplication {
 
-		public static void main(String[] args) {
-			SpringApplication.run(TestApplication.class, args);
-		}
-
-
-		@Bean
-	    ChatClientBuilderCustomizer setTemperature() {
-	    	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
-	    }
-		
-		@Bean
-		UiLocator uiLocator(ChatClient.Builder chatClientBuilder) {
-			return new UiLocator(chatClientBuilder);
-		}
-	}
+	// Uncomment to run this unit test individually without lunching the main application. This is useful for debugging the UiLocator class in isolation.
+//	@SpringBootApplication()
+//	@ComponentScan(excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = FgPeekabooPrototypeApplication.class))
+//	static class TestApplication {
+//
+//		public static void main(String[] args) {
+//			SpringApplication.run(TestApplication.class, args);
+//		}
+//
+//
+//		@Bean
+//	    ChatClientBuilderCustomizer setTemperature() {
+//	    	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
+//	    }
+//		
+//		@Bean
+//		UiLocator uiLocator(ChatClient.Builder chatClientBuilder) {
+//			return new UiLocator(chatClientBuilder);
+//		}
+//	}
 }

@@ -10,8 +10,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 //import org.modeljars.ModelBackend;
 //import org.modeljars.ModelJars;
 //import org.modeljars.ModelLoadOptions;
@@ -28,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.MimeType;
 
+import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
 //import com.integrallis.models.api.SamplingOptions;
 //import com.integrallis.models.spring.ai.ModelsSpringAiChatModel;
 import io.modelcontextprotocol.client.McpSyncClient;
@@ -36,6 +40,7 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
 
 @SpringBootApplication
 public class FgPeekabooPrototypeApplication {
+	private static final Logger log = LoggerFactory.getLogger(FgPeekabooPrototypeApplication.class);
 
 	public static void main(String[] args) {
 		SpringApplication.run(FgPeekabooPrototypeApplication.class, args);
@@ -108,23 +113,18 @@ public class FgPeekabooPrototypeApplication {
 	}
 
 	@Bean
-    ApplicationRunner callPeekabooDirectly(PeekabooMcpClient peekabooClient, ChatClient.Builder chatClientBuilder) {
+    ApplicationRunner callPeekabooDirectly(PeekabooMcpClient peekabooClient, ChatClient.Builder chatClientBuilder, UiLocator uiLocator) {
         return _ -> {
         	long fgProcessId = FantasyGroundsApp.processId();
 			System.out.println("Calling 'image' tool on PeekabooMcpClient for process %d...".formatted(fgProcessId));
 			Path screenshotPath = Files.createTempFile("fg_peekaboo_proto_screenshot", ".png");
 			peekabooClient.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooMcpClient.ImageFormat.PNG, PeekabooMcpClient.ImageScale.NATIVE, screenshotPath);
 			System.out.println("Screenshot saved to '%s'".formatted(screenshotPath.toAbsolutePath().toString()));
-			URL screenshotUrl = screenshotPath.toUri().toURL();
-			ChatClient chatClient = chatClientBuilder.build();
-			String result = chatClient.prompt()
-					  .user(p->p // .media(MimeType.valueOf("image/png"), screenshotUrl)
-							  	.text("Please describe the contents of the attached screenshot.")
-							)
-					  .call()
-					  .content();
+			uiLocator.locateButton("MY CAMPAIGNS", screenshotPath).ifPresentOrElse(
+					_-> System.out.println("Found 'MY CAMPAIGNS' button in the screenshot."),
+					() -> System.out.println("'MY CAMPAIGNS' button not found in the screenshot.")
+					);
 			
-			System.out.println("Model response:\n" + result);
         };
     }
 
