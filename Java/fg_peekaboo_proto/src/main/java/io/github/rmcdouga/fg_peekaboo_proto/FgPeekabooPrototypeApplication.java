@@ -23,6 +23,7 @@ import org.springframework.ai.chat.client.ChatClientBuilderCustomizer;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -84,12 +85,6 @@ public class FgPeekabooPrototypeApplication {
 //		customizer.customize(builder);
 //	}
 	
-    @Profile("!exclude-ai")
-    @Bean
-    ChatClientBuilderCustomizer setTemperature() {
-    	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
-    }
-	
 //    @Bean
 //    ApplicationRunner printMcpBeans(ApplicationContext ctx) {
 //        return _ -> {
@@ -104,18 +99,18 @@ public class FgPeekabooPrototypeApplication {
 //        };
 //    }
 
-    @Profile("!exclude-mcp")
-    @Bean
-    PeekabooMcpClient peekabooMcpClient(List<McpSyncClient> mcpClients) {
-    	return PeekabooMcpClient.find(mcpClients);
-    }
-    
     @Profile("!exclude-ai")
 	@Bean
 	UiLocator uiLocator(ChatClient.Builder chatClientBuilder) {
 		return new UiLocator(chatClientBuilder);
 	}
 
+    @Profile("!exclude-ai")
+    @Bean
+    ChatClientBuilderCustomizer setTemperature() {
+    	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
+    }
+	
 	@Profile("!integration-test")
 	@Bean
     ApplicationRunner callPeekabooDirectly(PeekabooMcpClient peekabooClient, ChatClient.Builder chatClientBuilder, UiLocator uiLocator) {
@@ -136,11 +131,39 @@ public class FgPeekabooPrototypeApplication {
 
     @Profile("!exclude-mcp")
     @Bean
+    PeekabooMcpClient peekabooMcpClient(List<McpSyncClient> mcpClients) {
+    	return PeekabooMcpClient.find(mcpClients);
+    }
+    
+    @Profile("!exclude-mcp")
+    @Bean
     ChatClientBuilderCustomizer addMcpTools(ToolCallbackProvider mcpToolCallbacks) {
     	ToolCallback[] toolCallbacks = mcpToolCallbacks.getToolCallbacks();
     	System.out.println("Adding MCP tools to ChatClient builder (%d tools):".formatted(toolCallbacks.length));
-    	Arrays.stream(toolCallbacks)
-    	 	.forEach(toolCallback -> System.out.println("  - Tool: " + toolCallback.getToolDefinition().name()));
+    	
+    	List<ToolCallback> tools = List.of(toolCallbacks);
+		tools.stream()
+		 	.forEach(toolCallback -> System.out.println("  - Tool: " + toolCallback.getToolDefinition().name()));
+		
+		// Find the details of a specific tool by name
+//		showSpecificToolInfo(tools, "app");
+		
+		
     	return builder -> builder.defaultTools(mcpToolCallbacks);
     }
+
+	private void showSpecificToolInfo(List<ToolCallback> tools, String toolName) {
+		Optional<ToolDefinition> imageTool = tools.stream()
+				.map(ToolCallback::getToolDefinition)
+				.filter(toolDef -> toolDef.name().equals(toolName))
+				.findFirst()
+				.map(toolDef -> {
+					System.out.println("Details of '" + toolName + "' tool:");
+					System.out.println("  - Name: " + toolDef.name());
+					System.out.println("  - Description: " + toolDef.description());
+					System.out.println("  - Input Schema: " + toolDef.inputSchema());
+					return toolDef;
+				})
+				;
+	}
 }

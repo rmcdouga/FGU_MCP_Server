@@ -4,6 +4,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.LongStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +17,7 @@ import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.Content;
+import io.modelcontextprotocol.spec.McpSchema.ImageContent;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
@@ -20,6 +26,8 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
  * 
  */
 public class PeekabooMcpClient {
+	private static final Pattern PID_PATTERN = Pattern.compile("PID:\\s*(\\d+)");
+
 	private static final Logger log = LoggerFactory.getLogger(PeekabooMcpClient.class);
 	
 	private final McpSyncClient client;
@@ -129,12 +137,7 @@ public class PeekabooMcpClient {
 								   											))
 									   							   .build());
 		
-		List<Content> contentList = toolResult.content();
-		log.atInfo().log(()->"Peekaboo MCP 'image' tool returned " + contentList.size() + " content items.");
-		var content = contentList.getFirst();
-		log.atInfo().log("Content type: " + content.type());
-		log.atInfo().log("Content metadata: " + Objects.requireNonNullElse(content.meta(), "").toString() + ".");
-		log.atInfo().log("Content data: " + ((TextContent)content).text());
+		displayToolResult(toolResult, "image");
 		
 		if (toolResult.isError()) {
 			throw new PeekabooMcpClientException("Error calling 'image' tool: " + toolResult.toString());
@@ -158,6 +161,11 @@ public class PeekabooMcpClient {
 								   											))
 									   							   .build());
 		
+		displayToolResult(toolResult, "image");
+		
+		// We don't currently do anything with the image data returned, 
+		// but we could extend this method to return the byte array if needed.
+
 		if (toolResult.isError()) {
 			throw new PeekabooMcpClientException("Error calling 'image' tool: " + toolResult.toString());
 		}
@@ -172,12 +180,7 @@ public class PeekabooMcpClient {
 								   											))
 									   							   .build());
 		
-		List<Content> contentList = toolResult.content();
-		log.atInfo().log(()->"Peekaboo MCP 'see' tool returned " + contentList.size() + " content items.");
-		var content = contentList.getFirst();
-		log.atInfo().log("Content type: " + content.type());
-		log.atInfo().log("Content metadata: " + Objects.requireNonNullElse(content.meta(), "").toString() + ".");
-		log.atInfo().log("Content data: " + ((TextContent)content).text());
+		displayToolResult(toolResult, "see");
 
 		if (toolResult.isError()) {
 			throw new PeekabooMcpClientException("Error calling 'see' tool: " + toolResult.toString());
@@ -204,16 +207,35 @@ public class PeekabooMcpClient {
 								   											))
 									   							   .build());
 		
+		displayToolResult(toolResult, "click");
+
 		if (toolResult.isError()) {
 			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
 		}
 	}
-	
+
+	private void displayToolResult(CallToolResult toolResult, String toolname) {
+		List<Content> contentList = toolResult.content();
+		log.atInfo().log(()->"Peekaboo MCP '" + toolname + "' tool returned " + contentList.size() + " content items.");
+		var content = contentList.getFirst();
+		log.atInfo().log("Content type: " + content.type());
+		log.atInfo().log("Content metadata: " + Objects.requireNonNullElse(content.meta(), "").toString() + ".");
+		switch (content.type()) {
+			case "text" -> log.atInfo().log("Content text: " + ((TextContent)content).text());
+			case "image" -> {
+				ImageContent imageContent = (ImageContent)content;
+				log.atInfo().log("Content image mime-type: " + imageContent.mimeType());
+				log.atInfo().log("Content image data length: " + imageContent.data().length() + " bytes.");
+				}
+			default -> log.atInfo().log("Unimplemented content type: '" + content.type() + "'.");
+		}
+	}
 	
 	public long appLaunch(String bundleId) {
-		CallToolResult toolResult = client.callTool(CallToolRequest.builder("click")
+		CallToolResult toolResult = client.callTool(CallToolRequest.builder("app")
 				   .arguments(Map.of(
-						   "bundle_id", bundleId,
+						   "action", "launch",
+						   "bundleId", bundleId,
 						   "foreground", "true"
 							))
 				   .build());
@@ -226,9 +248,16 @@ public class PeekabooMcpClient {
 				  .filter(c -> c.type().equals("text"))
 				  .findFirst()
 				  .map(c -> ((TextContent)c).text())
-				  .map(Long::parseLong)
+				  .flatMap(PeekabooMcpClient::extractPid)
 				  .orElseThrow(() -> new PeekabooMcpClientException("No process ID returned from 'app_launch' tool."));
 		
+	}
+	
+	private static Optional<Long> extractPid(String content) {
+		  // Define pattern to match "PID: " followed by one or more digits
+        Matcher matcher = PID_PATTERN.matcher(content);
+        return matcher.find() ? Optional.of(Long.parseLong(matcher.group(1))) : Optional.empty();
+        
 	}
 	
 	public static class PeekabooMcpClientException extends RuntimeException {

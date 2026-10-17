@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ActiveProfiles({ "integration-test", "exclude-mcp" })
+// @ActiveProfiles({ "integration-test", "exclude-mcp" })
 class UiLocatorTest {
 	private static final Logger log = LoggerFactory.getLogger(UiLocatorTest.class);
 	private static final Path UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png");

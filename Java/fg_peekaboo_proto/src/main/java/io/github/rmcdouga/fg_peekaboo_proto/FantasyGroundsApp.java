@@ -5,6 +5,8 @@ import java.util.OptionalLong;
 
 public class FantasyGroundsApp {
 	private static final String FG_PROCESS_NAME = "SmiteWorks"; // The name of the Fantasy Grounds process should contain this
+	private static final String FG_BUNDLE_ID = "unity.SmiteWorks.Fantasy Grounds"; // The bundle identifier for Fantasy Grounds (macOS)
+
 	private final PeekabooMcpClient peekabooMcpClient;
 	private final UiLocator uiLocator;
 	

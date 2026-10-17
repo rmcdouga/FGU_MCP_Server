@@ -1,41 +1,90 @@
 package io.github.rmcdouga.fg_peekaboo_proto;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.file.Path;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@Disabled("Not yet implemented")
+import io.modelcontextprotocol.client.McpSyncClient;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+// @ActiveProfiles({ "integration-test", "exclude-ai" })
+@TestMethodOrder(OrderAnnotation.class)
+@TestInstance(Lifecycle.PER_CLASS)
 class PeekabooMcpClientTest {
+	private static final String FG_BUNDLE_ID = "unity.SmiteWorks.Fantasy Grounds"; // The bundle identifier for Fantasy Grounds (macOS)
 
-	@Test
-	void testFind() {
-		fail("Not yet implemented");
+	private final PeekabooMcpClient underTest;
+	private long fgProcessId;
+	
+	public PeekabooMcpClientTest(@Autowired List<McpSyncClient> mcpClients) {
+		underTest = PeekabooMcpClient.find(mcpClients);
 	}
 
 	@Test
-	void testImageAppTargetImageFormatImageScalePath() {
-		fail("Not yet implemented");
+	@Order(1)
+	void testAppLaunch() {
+		long result = underTest.appLaunch(FG_BUNDLE_ID);
+		
+		fgProcessId = result;
+		assertThat(result).as("The Fantasy Grounds process ID should be greater than 0 after launch.")
+						  .isGreaterThan(0);
 	}
 
 	@Test
+	@Order(2)
+	void testImageAppTargetImageFormatImageScalePath(@TempDir Path tempDir) {
+		validateFgProcessId();
+		Path screenshotPath = tempDir.resolve("PeekabooMcpClientTest_testImageAppTargetImageFormatImageScalePath_screenshot.png");
+		underTest.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooMcpClient.ImageFormat.PNG, PeekabooMcpClient.ImageScale.NATIVE, screenshotPath );
+		
+		assertThat(screenshotPath).as("Screenshot file should exist after image capture.")
+								  .existsNoFollowLinks();
+	}
+
+	@Test
+	@Order(2)
 	void testImageAppTargetImageScale() {
-		fail("Not yet implemented");
+		validateFgProcessId();
+		underTest.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooMcpClient.ImageScale.NATIVE);
 	}
 
+	@Disabled("This test is not yet implemented.")
 	@Test
+	@Order(2)
 	void testSee() {
 		fail("Not yet implemented");
 	}
 
+	@Disabled("This test is not yet implemented.")
 	@Test
+	@Order(2)
 	void testClick() {
 		fail("Not yet implemented");
 	}
 
-	@Test
-	void testAppLaunch() {
-		fail("Not yet implemented");
+	private void validateFgProcessId() {
+		if (fgProcessId == 0) {
+			fgProcessId = FantasyGroundsApp.processId().orElse(0);
+		}
+		if (fgProcessId == 0) {
+			fail("Fantasy Grounds process not found. Please ensure Fantasy Grounds is running before executing this test.");
+		} else {
+			System.out.printf("Fantasy Grounds process ID: %d%n", fgProcessId);
+		}
 	}
-
 }
