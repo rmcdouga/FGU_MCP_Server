@@ -24,10 +24,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.test.context.ActiveProfiles;
 
 import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ActiveProfiles({ "integration-test", "exclude-mcp" })
 class UiLocatorTest {
 	private static final Logger log = LoggerFactory.getLogger(UiLocatorTest.class);
 	private static final Path UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png");
@@ -112,25 +114,4 @@ class UiLocatorTest {
 			.isThrownBy(()->uiLocator.locateButton("MY CAMPAIGNS", Path.of(nonExistentFilename)))
 			.withMessageContaining("NonExistentScreenshot.png");
 	}
-
-	// Uncomment to run this unit test individually without lunching the main application. This is useful for debugging the UiLocator class in isolation.
-//	@SpringBootApplication()
-//	@ComponentScan(excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = FgPeekabooPrototypeApplication.class))
-//	static class TestApplication {
-//
-//		public static void main(String[] args) {
-//			SpringApplication.run(TestApplication.class, args);
-//		}
-//
-//
-//		@Bean
-//	    ChatClientBuilderCustomizer setTemperature() {
-//	    	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
-//	    }
-//		
-//		@Bean
-//		UiLocator uiLocator(ChatClient.Builder chatClientBuilder) {
-//			return new UiLocator(chatClientBuilder);
-//		}
-//	}
 }

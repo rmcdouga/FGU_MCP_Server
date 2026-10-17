@@ -3,6 +3,7 @@ package io.github.rmcdouga.fg_peekaboo_proto;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.Content;
+import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * This class manages the Peekaboo MCP server and provides methods to interact with it, 
@@ -128,9 +130,14 @@ public class PeekabooMcpClient {
 									   							   .build());
 		
 		List<Content> contentList = toolResult.content();
+		log.atInfo().log(()->"Peekaboo MCP 'image' tool returned " + contentList.size() + " content items.");
+		var content = contentList.getFirst();
+		log.atInfo().log("Content type: " + content.type());
+		log.atInfo().log("Content metadata: " + Objects.requireNonNullElse(content.meta(), "").toString() + ".");
+		log.atInfo().log("Content data: " + ((TextContent)content).text());
 		
 		if (toolResult.isError()) {
-			throw new IllegalStateException("Error calling 'image' tool: " + toolResult.toString());
+			throw new PeekabooMcpClientException("Error calling 'image' tool: " + toolResult.toString());
 		}
 	}
 
@@ -152,7 +159,28 @@ public class PeekabooMcpClient {
 									   							   .build());
 		
 		if (toolResult.isError()) {
-			throw new IllegalStateException("Error calling 'image' tool: " + toolResult.toString());
+			throw new PeekabooMcpClientException("Error calling 'image' tool: " + toolResult.toString());
+		}
+		
+	}
+	
+	public void see(AppTarget target, Path outputPath) {
+		CallToolResult toolResult = client.callTool(CallToolRequest.builder("see")
+									   							   .arguments(Map.of(
+									   									   "app_target", target.value(),
+									   									   "path", outputPath.toString()
+								   											))
+									   							   .build());
+		
+		List<Content> contentList = toolResult.content();
+		log.atInfo().log(()->"Peekaboo MCP 'see' tool returned " + contentList.size() + " content items.");
+		var content = contentList.getFirst();
+		log.atInfo().log("Content type: " + content.type());
+		log.atInfo().log("Content metadata: " + Objects.requireNonNullElse(content.meta(), "").toString() + ".");
+		log.atInfo().log("Content data: " + ((TextContent)content).text());
+
+		if (toolResult.isError()) {
+			throw new PeekabooMcpClientException("Error calling 'see' tool: " + toolResult.toString());
 		}
 		
 	}
@@ -177,7 +205,39 @@ public class PeekabooMcpClient {
 									   							   .build());
 		
 		if (toolResult.isError()) {
-			throw new IllegalStateException("Error calling 'click' tool: " + toolResult.toString());
+			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
+		}
+	}
+	
+	
+	public long appLaunch(String bundleId) {
+		CallToolResult toolResult = client.callTool(CallToolRequest.builder("click")
+				   .arguments(Map.of(
+						   "bundle_id", bundleId,
+						   "foreground", "true"
+							))
+				   .build());
+
+		if (toolResult.isError()) {
+			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
+		}
+		
+		return toolResult.content().stream()
+				  .filter(c -> c.type().equals("text"))
+				  .findFirst()
+				  .map(c -> ((TextContent)c).text())
+				  .map(Long::parseLong)
+				  .orElseThrow(() -> new PeekabooMcpClientException("No process ID returned from 'app_launch' tool."));
+		
+	}
+	
+	public static class PeekabooMcpClientException extends RuntimeException {
+		public PeekabooMcpClientException(String message) {
+			super(message);
+		}
+		
+		public PeekabooMcpClientException(String message, Throwable cause) {
+			super(message, cause);
 		}
 	}
 }

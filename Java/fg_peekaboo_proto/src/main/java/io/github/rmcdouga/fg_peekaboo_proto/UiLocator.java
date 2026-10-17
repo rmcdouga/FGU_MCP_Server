@@ -18,8 +18,8 @@ public class UiLocator {
 	
 	// TODO: IMAGE SIZE is currently hardcoded, but it should be dynamically determined from the screenshot image.
 	//       This is a temporary solution until we can get the actual image size from the screenshot.
-	private static final int IMAGE_SIZE_X = 3176;
-	private static final int IMAGE_SIZE_Y = 1924;
+	private static final int IMAGE_SIZE_X = 3176; // 1588 vs 1598 (latter is real)
+	private static final int IMAGE_SIZE_Y = 1924; // 962 vs 994
 	
 	public record ButtonClickLocation(int x, int y) {
 		public static ButtonClickLocation fromBoundingBox(int xmin, int ymin, int xmax, int ymax) {

@@ -29,6 +29,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.util.MimeType;
 
 import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
@@ -83,6 +84,7 @@ public class FgPeekabooPrototypeApplication {
 //		customizer.customize(builder);
 //	}
 	
+    @Profile("!exclude-ai")
     @Bean
     ChatClientBuilderCustomizer setTemperature() {
     	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
@@ -102,23 +104,27 @@ public class FgPeekabooPrototypeApplication {
 //        };
 //    }
 
+    @Profile("!exclude-mcp")
     @Bean
     PeekabooMcpClient peekabooMcpClient(List<McpSyncClient> mcpClients) {
     	return PeekabooMcpClient.find(mcpClients);
     }
     
+    @Profile("!exclude-ai")
 	@Bean
 	UiLocator uiLocator(ChatClient.Builder chatClientBuilder) {
 		return new UiLocator(chatClientBuilder);
 	}
 
+	@Profile("!integration-test")
 	@Bean
     ApplicationRunner callPeekabooDirectly(PeekabooMcpClient peekabooClient, ChatClient.Builder chatClientBuilder, UiLocator uiLocator) {
         return _ -> {
-        	long fgProcessId = FantasyGroundsApp.processId();
+        	long fgProcessId = FantasyGroundsApp.processId().orElseThrow();
 			System.out.println("Calling 'image' tool on PeekabooMcpClient for process %d...".formatted(fgProcessId));
 			Path screenshotPath = Files.createTempFile("fg_peekaboo_proto_screenshot", ".png");
 			peekabooClient.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooMcpClient.ImageFormat.PNG, PeekabooMcpClient.ImageScale.NATIVE, screenshotPath);
+//			peekabooClient.see(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
 			System.out.println("Screenshot saved to '%s'".formatted(screenshotPath.toAbsolutePath().toString()));
 			uiLocator.locateButton("MY CAMPAIGNS", screenshotPath).ifPresentOrElse(
 					_-> System.out.println("Found 'MY CAMPAIGNS' button in the screenshot."),
@@ -128,12 +134,13 @@ public class FgPeekabooPrototypeApplication {
         };
     }
 
+    @Profile("!exclude-mcp")
     @Bean
     ChatClientBuilderCustomizer addMcpTools(ToolCallbackProvider mcpToolCallbacks) {
-//    	ToolCallback[] toolCallbacks = mcpToolCallbacks.getToolCallbacks();
-//    	System.out.println("Adding MCP tools to ChatClient builder (%d tools):".formatted(toolCallbacks.length));
-//    	Arrays.stream(toolCallbacks)
-//    	 	.forEach(toolCallback -> System.out.println("  - Tool: " + toolCallback.getToolDefinition().name()));
+    	ToolCallback[] toolCallbacks = mcpToolCallbacks.getToolCallbacks();
+    	System.out.println("Adding MCP tools to ChatClient builder (%d tools):".formatted(toolCallbacks.length));
+    	Arrays.stream(toolCallbacks)
+    	 	.forEach(toolCallback -> System.out.println("  - Tool: " + toolCallback.getToolDefinition().name()));
     	return builder -> builder.defaultTools(mcpToolCallbacks);
     }
 }
