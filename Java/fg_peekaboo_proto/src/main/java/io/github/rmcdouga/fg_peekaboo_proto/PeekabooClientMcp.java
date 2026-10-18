@@ -25,10 +25,10 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
  * such as capturing images of application windows.
  * 
  */
-public class PeekabooMcpClient implements PeekabooClient {
+public class PeekabooClientMcp implements PeekabooClient {
 	private static final Pattern PID_PATTERN = Pattern.compile("PID:\\s*(\\d+)");
 
-	private static final Logger log = LoggerFactory.getLogger(PeekabooMcpClient.class);
+	private static final Logger log = LoggerFactory.getLogger(PeekabooClientMcp.class);
 	
 	private final McpSyncClient client;
 	
@@ -39,7 +39,7 @@ public class PeekabooMcpClient implements PeekabooClient {
 //	}
 	
 	// Private constructor to enforce the use of the static find() method for instantiation.
-	private PeekabooMcpClient(McpSyncClient client) {
+	private PeekabooClientMcp(McpSyncClient client) {
 		this.client = client;
 	}
 	
@@ -57,7 +57,7 @@ public class PeekabooMcpClient implements PeekabooClient {
 		if (servers.size() != 1) {
 			throw new IllegalStateException("Expected exactly one PeekabooMcpClient, found " + servers.size());
 		}
-		return new PeekabooMcpClient(servers.getFirst());
+		return new PeekabooClientMcp(servers.getFirst());
 	}
 	
 	/**
@@ -224,7 +224,7 @@ public class PeekabooMcpClient implements PeekabooClient {
 				  .filter(c -> c.type().equals("text"))
 				  .findFirst()
 				  .map(c -> ((TextContent)c).text())
-				  .flatMap(PeekabooMcpClient::extractPid)
+				  .flatMap(PeekabooClientMcp::extractPid)
 				  .orElseThrow(() -> new PeekabooMcpClientException("No process ID returned from 'app_launch' tool."));
 		
 	}
@@ -247,7 +247,7 @@ public class PeekabooMcpClient implements PeekabooClient {
 				  .filter(c -> c.type().equals("text"))
 				  .findFirst()
 				  .map(c -> ((TextContent)c).text())
-				  .flatMap(PeekabooMcpClient::extractPid)
+				  .flatMap(PeekabooClientMcp::extractPid)
 				  .orElseThrow(() -> new PeekabooMcpClientException("No process ID returned from 'app_launch' tool."));
 		
 	}

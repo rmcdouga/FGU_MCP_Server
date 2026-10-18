@@ -2,7 +2,7 @@ package io.github.rmcdouga.fg_peekaboo_proto;
 
 import java.nio.file.Path;
 
-public class PeekabooCliClient implements PeekabooClient {
+public class PeekabooClientCli implements PeekabooClient {
 
 	@Override
 	public void image(AppTarget target, ImageFormat format, ImageScale scale, Path outputPath) {

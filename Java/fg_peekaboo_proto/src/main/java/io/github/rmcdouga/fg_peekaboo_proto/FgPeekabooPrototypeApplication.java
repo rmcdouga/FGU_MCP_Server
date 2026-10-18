@@ -135,7 +135,7 @@ public class FgPeekabooPrototypeApplication {
     @Profile("!exclude-mcp")
     @Bean
     PeekabooClient peekabooMcpClient(List<McpSyncClient> mcpClients) {
-    	return PeekabooMcpClient.find(mcpClients);
+    	return PeekabooClientMcp.find(mcpClients);
     }
     
     @Profile("!exclude-mcp")

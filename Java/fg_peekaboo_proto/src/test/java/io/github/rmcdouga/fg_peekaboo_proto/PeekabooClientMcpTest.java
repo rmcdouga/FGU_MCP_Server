@@ -29,14 +29,14 @@ import io.modelcontextprotocol.client.McpSyncClient;
 @ActiveProfiles({ "integration-test", "exclude-ai" })
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)
-class PeekabooMcpClientTest {
+class PeekabooClientMcpTest {
 	private static final String FG_BUNDLE_ID = "unity.SmiteWorks.Fantasy Grounds"; // The bundle identifier for Fantasy Grounds (macOS)
 
 	private final PeekabooClient underTest;
 	private long fgProcessId;
 	
-	public PeekabooMcpClientTest(@Autowired List<McpSyncClient> mcpClients) {
-		underTest = PeekabooMcpClient.find(mcpClients);
+	public PeekabooClientMcpTest(@Autowired List<McpSyncClient> mcpClients) {
+		underTest = PeekabooClientMcp.find(mcpClients);
 	}
 
 	@Test
