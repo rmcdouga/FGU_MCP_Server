@@ -25,7 +25,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
  * such as capturing images of application windows.
  * 
  */
-public class PeekabooMcpClient {
+public class PeekabooMcpClient implements PeekabooClient {
 	private static final Pattern PID_PATTERN = Pattern.compile("PID:\\s*(\\d+)");
 
 	private static final Logger log = LoggerFactory.getLogger(PeekabooMcpClient.class);
@@ -37,63 +37,6 @@ public class PeekabooMcpClient {
 //			return new Process(id);
 //		}
 //	}
-	
-	/**
-	 * Manages the "app_target" argument for the "image" tool, which can be specified as 
-	 * an application name, process ID, or frontmost application.
-	 */
-	public static sealed interface AppTarget {
-		
-		String value();
-		
-		public static final record AppNameTarget(String name) implements AppTarget {
-			public static AppNameTarget of(String name) {
-				return new AppNameTarget(name);
-			}
-
-			@Override
-			public String value() {
-				return name;
-			}
-		}
-		
-		public static final record ProcessTarget(long processId) implements AppTarget {
-			public static ProcessTarget of(long processId) {
-				return new ProcessTarget(processId);
-			}
-
-			@Override
-			public String value() {
-				return "PID:" + String.valueOf(processId);
-			}
-		}
-		
-		public static final record FrontMostTarget() implements AppTarget {
-			public static FrontMostTarget of() {
-				return new FrontMostTarget();
-			}
-
-			@Override
-			public String value() {
-				return "frontmost";
-			}
-		}
-	}
-	
-	/**
-	 * Image format options for the "image" tool
-	 */
-	public enum ImageFormat {
-		PNG, JPEG;
-	}
-
-	/**
-	 * Image scale options for the "image" tool. LOGICAL scale captures the image at the logical resolution, 
-	 * while NATIVE scale captures it at the native resolution of the display.
-	 */
-	public enum ImageScale {
-		LOGICAL, NATIVE;
-	}
 	
 	// Private constructor to enforce the use of the static find() method for instantiation.
 	private PeekabooMcpClient(McpSyncClient client) {
@@ -109,7 +52,7 @@ public class PeekabooMcpClient {
 	 * 
 	 * @throws IllegalStateException if there is not exactly one PeekabooMcpClient found.
 	 */
-	public static PeekabooMcpClient find(List<McpSyncClient> clients) {
+	public static PeekabooClient find(List<McpSyncClient> clients) {
 		List<McpSyncClient> servers = clients.stream().filter(c ->c.getServerInfo().name().toLowerCase().equals("peekaboo-mcp")).toList();
 		if (servers.size() != 1) {
 			throw new IllegalStateException("Expected exactly one PeekabooMcpClient, found " + servers.size());
@@ -127,6 +70,7 @@ public class PeekabooMcpClient {
 	 * 
 	 * @throws IllegalStateException if there is an error calling the 'image' tool on the Peekaboo MCP server.
 	 */
+	@Override
 	public void image(AppTarget target, ImageFormat format, ImageScale scale, Path outputPath) {
 		CallToolResult toolResult = client.callTool(CallToolRequest.builder("image")
 									   							   .arguments(Map.of(
@@ -152,6 +96,7 @@ public class PeekabooMcpClient {
 	 * 
 	 * @throws IllegalStateException if there is an error calling the 'image' tool on the Peekaboo MCP server.
 	 */
+	@Override
 	public void image(AppTarget target, ImageScale scale) {
 		CallToolResult toolResult = client.callTool(CallToolRequest.builder("image")
 									   							   .arguments(Map.of(
@@ -172,11 +117,13 @@ public class PeekabooMcpClient {
 		
 	}
 	
+	@Override
 	public void see(AppTarget target, Path outputPath) {
 		CallToolResult toolResult = client.callTool(CallToolRequest.builder("see")
 									   							   .arguments(Map.of(
 									   									   "app_target", target.value(),
-									   									   "path", outputPath.toString()
+									   									   "path", outputPath.toString(),
+									   									   "fresh", true
 								   											))
 									   							   .build());
 		
@@ -197,13 +144,13 @@ public class PeekabooMcpClient {
 	 * 
 	 * @throws IllegalStateException if there is an error calling the 'click' tool on the Peekaboo MCP server.
 	 */
-	public void click(AppTarget target, int x, int y) {
+	@Override
+	public void click(long pid, int x, int y) {
 		CallToolResult toolResult = client.callTool(CallToolRequest.builder("click")
 									   							   .arguments(Map.of(
-									   									   // TODO:  These parameters are all wrong.
-									   									   "app_target", target.value(),
-									   									   "x", String.valueOf(x),
-									   									   "y", String.valueOf(y)
+									   									   "pid", Long.toString(pid),
+									   									   "coords", "%d,%d".formatted(x, y),
+									   									   "foreground", true
 								   											))
 									   							   .build());
 		
@@ -211,6 +158,34 @@ public class PeekabooMcpClient {
 
 		if (toolResult.isError()) {
 			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
+		}
+	}
+
+	/**
+	 * Simulates a mouse move at the specified (x, y) coordinates within the given application target.
+	 * 
+	 * @param target the application target where the click should occur (by name, process ID, or frontmost)
+	 * @param x the x-coordinate of the click position
+	 * @param y the y-coordinate of the click position
+	 * 
+	 * @throws IllegalStateException if there is an error calling the 'click' tool on the Peekaboo MCP server.
+	 */
+	@Override
+	public void move(AppTarget target, int x, int y) {
+		
+		CallToolResult toolResult = client.callTool(CallToolRequest.builder("move")
+									   							   .arguments(Map.of(
+//									   									   "pid", Long.toString(pid),
+									   									   "to", "%d,%d".formatted(x, y),
+									   									   "foreground", true
+//									   									   "profile", "human"
+								   											))
+									   							   .build());
+		
+		displayToolResult(toolResult, "move");
+
+		if (toolResult.isError()) {
+			throw new PeekabooMcpClientException("Error calling 'move' tool: " + toolResult.toString());
 		}
 	}
 
@@ -231,11 +206,35 @@ public class PeekabooMcpClient {
 		}
 	}
 	
+	@Override
 	public long appLaunch(String bundleId) {
 		CallToolResult toolResult = client.callTool(CallToolRequest.builder("app")
 				   .arguments(Map.of(
 						   "action", "launch",
 						   "bundleId", bundleId,
+						   "foreground", "true"
+							))
+				   .build());
+
+		if (toolResult.isError()) {
+			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
+		}
+		
+		return toolResult.content().stream()
+				  .filter(c -> c.type().equals("text"))
+				  .findFirst()
+				  .map(c -> ((TextContent)c).text())
+				  .flatMap(PeekabooMcpClient::extractPid)
+				  .orElseThrow(() -> new PeekabooMcpClientException("No process ID returned from 'app_launch' tool."));
+		
+	}
+	
+	@Override
+	public long appFocus(long pid) {
+		CallToolResult toolResult = client.callTool(CallToolRequest.builder("app")
+				   .arguments(Map.of(
+						   "action", "focus",
+						   "name", "PID:" + Long.toString(pid),
 						   "foreground", "true"
 							))
 				   .build());

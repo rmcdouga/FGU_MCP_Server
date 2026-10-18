@@ -25,6 +25,7 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -43,6 +44,8 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
 @SpringBootApplication
 public class FgPeekabooPrototypeApplication {
 	private static final Logger log = LoggerFactory.getLogger(FgPeekabooPrototypeApplication.class);
+	private static final String CFG_PREFIX = "fg_peekaboo_proto.";
+	public static final String CFG_SHOW_TOOL_INFO = CFG_PREFIX + "show_tool_info";
 
 	public static void main(String[] args) {
 		SpringApplication.run(FgPeekabooPrototypeApplication.class, args);
@@ -113,12 +116,12 @@ public class FgPeekabooPrototypeApplication {
 	
 	@Profile("!integration-test")
 	@Bean
-    ApplicationRunner callPeekabooDirectly(PeekabooMcpClient peekabooClient, ChatClient.Builder chatClientBuilder, UiLocator uiLocator) {
+    ApplicationRunner callPeekabooDirectly(PeekabooClient peekabooClient, ChatClient.Builder chatClientBuilder, UiLocator uiLocator) {
         return _ -> {
         	long fgProcessId = FantasyGroundsApp.processId().orElseThrow();
 			System.out.println("Calling 'image' tool on PeekabooMcpClient for process %d...".formatted(fgProcessId));
 			Path screenshotPath = Files.createTempFile("fg_peekaboo_proto_screenshot", ".png");
-			peekabooClient.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooMcpClient.ImageFormat.PNG, PeekabooMcpClient.ImageScale.NATIVE, screenshotPath);
+			peekabooClient.image(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooClient.ImageFormat.PNG, PeekabooClient.ImageScale.NATIVE, screenshotPath);
 //			peekabooClient.see(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
 			System.out.println("Screenshot saved to '%s'".formatted(screenshotPath.toAbsolutePath().toString()));
 			uiLocator.locateButton("MY CAMPAIGNS", screenshotPath).ifPresentOrElse(
@@ -131,13 +134,13 @@ public class FgPeekabooPrototypeApplication {
 
     @Profile("!exclude-mcp")
     @Bean
-    PeekabooMcpClient peekabooMcpClient(List<McpSyncClient> mcpClients) {
+    PeekabooClient peekabooMcpClient(List<McpSyncClient> mcpClients) {
     	return PeekabooMcpClient.find(mcpClients);
     }
     
     @Profile("!exclude-mcp")
     @Bean
-    ChatClientBuilderCustomizer addMcpTools(ToolCallbackProvider mcpToolCallbacks) {
+    ChatClientBuilderCustomizer addMcpTools(ToolCallbackProvider mcpToolCallbacks, @Value("${" + CFG_SHOW_TOOL_INFO + "}") String showToolInfo) {
     	ToolCallback[] toolCallbacks = mcpToolCallbacks.getToolCallbacks();
     	System.out.println("Adding MCP tools to ChatClient builder (%d tools):".formatted(toolCallbacks.length));
     	
@@ -146,8 +149,9 @@ public class FgPeekabooPrototypeApplication {
 		 	.forEach(toolCallback -> System.out.println("  - Tool: " + toolCallback.getToolDefinition().name()));
 		
 		// Find the details of a specific tool by name
-//		showSpecificToolInfo(tools, "app");
-		
+		if (showToolInfo != null && !showToolInfo.isBlank()) {
+			showSpecificToolInfo(tools, showToolInfo);
+		}		
 		
     	return builder -> builder.defaultTools(mcpToolCallbacks);
     }

@@ -21,14 +21,18 @@ import org.springframework.test.context.ActiveProfiles;
 
 import io.modelcontextprotocol.client.McpSyncClient;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-// @ActiveProfiles({ "integration-test", "exclude-ai" })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, 
+				properties = {
+					"fg_peekaboo_proto.show_tool_info=window"	// Use this to show tool information in the logs for debugging purposes. Comment out to disable.
+					}
+				)		
+@ActiveProfiles({ "integration-test", "exclude-ai" })
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)
 class PeekabooMcpClientTest {
 	private static final String FG_BUNDLE_ID = "unity.SmiteWorks.Fantasy Grounds"; // The bundle identifier for Fantasy Grounds (macOS)
 
-	private final PeekabooMcpClient underTest;
+	private final PeekabooClient underTest;
 	private long fgProcessId;
 	
 	public PeekabooMcpClientTest(@Autowired List<McpSyncClient> mcpClients) {
@@ -50,7 +54,7 @@ class PeekabooMcpClientTest {
 	void testImageAppTargetImageFormatImageScalePath(@TempDir Path tempDir) {
 		validateFgProcessId();
 		Path screenshotPath = tempDir.resolve("PeekabooMcpClientTest_testImageAppTargetImageFormatImageScalePath_screenshot.png");
-		underTest.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooMcpClient.ImageFormat.PNG, PeekabooMcpClient.ImageScale.NATIVE, screenshotPath );
+		underTest.image(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooClient.ImageFormat.PNG, PeekabooClient.ImageScale.NATIVE, screenshotPath );
 		
 		assertThat(screenshotPath).as("Screenshot file should exist after image capture.")
 								  .existsNoFollowLinks();
@@ -60,21 +64,36 @@ class PeekabooMcpClientTest {
 	@Order(2)
 	void testImageAppTargetImageScale() {
 		validateFgProcessId();
-		underTest.image(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooMcpClient.ImageScale.NATIVE);
+		underTest.image(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooClient.ImageScale.NATIVE);
+	}
+
+	@Disabled("The see command does not work yet, so this will always fail.")
+	@Test
+	@Order(2)
+	void testSee(@TempDir Path tempDir) {
+		validateFgProcessId();
+		Path screenshotPath = tempDir.resolve("PeekabooMcpClientTest_testSee_screenshot.png");
+		underTest.see(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
+		
+		assertThat(screenshotPath).as("Screenshot file should exist after see command.")
+								  .existsNoFollowLinks();
+	}
+
+	@Test
+	@Order(3)
+	void testMove() {
+		validateFgProcessId();
+		underTest.appFocus(fgProcessId);
+		underTest.move(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), 600, 80);
+//		underTest.click(fgProcessId, 600, 80);
 	}
 
 	@Disabled("This test is not yet implemented.")
 	@Test
-	@Order(2)
-	void testSee() {
-		fail("Not yet implemented");
-	}
-
-	@Disabled("This test is not yet implemented.")
-	@Test
-	@Order(2)
+	@Order(4)
 	void testClick() {
-		fail("Not yet implemented");
+		validateFgProcessId();
+		underTest.click(fgProcessId, 600, 80);
 	}
 
 	private void validateFgProcessId() {
