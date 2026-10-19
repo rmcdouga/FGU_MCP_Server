@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>org.modeljars</groupId>
 			<artifactId>modeljars</artifactId>
-			<version>0.1.31</version>
+			<version>0.1.61</version>
 		</dependency>
 		<dependency>
 			<groupId>com.integrallis</groupId>
