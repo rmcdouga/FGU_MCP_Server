@@ -84,7 +84,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 		displayToolResult(toolResult, "image");
 		
 		if (toolResult.isError()) {
-			throw new PeekabooMcpClientException("Error calling 'image' tool: " + toolResult.toString());
+			throw new PeekabooClientException("Error calling 'image' tool: " + toolResult.toString());
 		}
 	}
 
@@ -112,7 +112,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 		// but we could extend this method to return the byte array if needed.
 
 		if (toolResult.isError()) {
-			throw new PeekabooMcpClientException("Error calling 'image' tool: " + toolResult.toString());
+			throw new PeekabooClientException("Error calling 'image' tool: " + toolResult.toString());
 		}
 		
 	}
@@ -130,7 +130,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 		displayToolResult(toolResult, "see");
 
 		if (toolResult.isError()) {
-			throw new PeekabooMcpClientException("Error calling 'see' tool: " + toolResult.toString());
+			throw new PeekabooClientException("Error calling 'see' tool: " + toolResult.toString());
 		}
 		
 	}
@@ -157,7 +157,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 		displayToolResult(toolResult, "click");
 
 		if (toolResult.isError()) {
-			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
+			throw new PeekabooClientException("Error calling 'click' tool: " + toolResult.toString());
 		}
 	}
 
@@ -185,7 +185,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 		displayToolResult(toolResult, "move");
 
 		if (toolResult.isError()) {
-			throw new PeekabooMcpClientException("Error calling 'move' tool: " + toolResult.toString());
+			throw new PeekabooClientException("Error calling 'move' tool: " + toolResult.toString());
 		}
 	}
 
@@ -217,7 +217,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 				   .build());
 
 		if (toolResult.isError()) {
-			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
+			throw new PeekabooClientException("Error calling 'click' tool: " + toolResult.toString());
 		}
 		
 		return toolResult.content().stream()
@@ -225,7 +225,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 				  .findFirst()
 				  .map(c -> ((TextContent)c).text())
 				  .flatMap(PeekabooClientMcp::extractPid)
-				  .orElseThrow(() -> new PeekabooMcpClientException("No process ID returned from 'app_launch' tool."));
+				  .orElseThrow(() -> new PeekabooClientException("No process ID returned from 'app_launch' tool."));
 		
 	}
 	
@@ -240,7 +240,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 				   .build());
 
 		if (toolResult.isError()) {
-			throw new PeekabooMcpClientException("Error calling 'click' tool: " + toolResult.toString());
+			throw new PeekabooClientException("Error calling 'click' tool: " + toolResult.toString());
 		}
 		
 		return toolResult.content().stream()
@@ -248,7 +248,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 				  .findFirst()
 				  .map(c -> ((TextContent)c).text())
 				  .flatMap(PeekabooClientMcp::extractPid)
-				  .orElseThrow(() -> new PeekabooMcpClientException("No process ID returned from 'app_launch' tool."));
+				  .orElseThrow(() -> new PeekabooClientException("No process ID returned from 'app_launch' tool."));
 		
 	}
 	
@@ -259,13 +259,4 @@ public class PeekabooClientMcp implements PeekabooClient {
         
 	}
 	
-	public static class PeekabooMcpClientException extends RuntimeException {
-		public PeekabooMcpClientException(String message) {
-			super(message);
-		}
-		
-		public PeekabooMcpClientException(String message, Throwable cause) {
-			super(message, cause);
-		}
-	}
 }

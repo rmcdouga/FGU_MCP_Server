@@ -111,5 +111,15 @@ public interface PeekabooClient {
 	long appLaunch(String bundleId);
 
 	long appFocus(long pid);
-
+	
+	@SuppressWarnings("serial")
+	public static class PeekabooClientException extends RuntimeException {
+		public PeekabooClientException(String message) {
+			super(message);
+		}
+		
+		public PeekabooClientException(String message, Throwable cause) {
+			super(message, cause);
+		}
+	}
 }
