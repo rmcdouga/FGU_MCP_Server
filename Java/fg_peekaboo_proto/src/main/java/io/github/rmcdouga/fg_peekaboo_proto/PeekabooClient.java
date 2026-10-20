@@ -100,7 +100,21 @@ public interface PeekabooClient {
 	 */
 	void image(AppTarget target, ImageScale scale);
 
-	void see(AppTarget target, Path outputPath);
+	record ImageInfo(int width, int height) {
+		public static ImageInfo of(int width, int height) {
+			return new ImageInfo(width, height);
+		}
+	}
+	/**
+	 * Captures an image of the specified application target and saves it to the given output path.
+	 * 
+	 * @param target the application target to capture (by name, process ID, or frontmost)
+	 * @param outputPath the path where the captured image will be saved
+	 * @return ImageInfo containing information (e.g. the width and height) about the captured image
+	 * 
+	 * @throws IllegalStateException if there is an error calling the 'see' tool on the Peekaboo MCP server.
+	 */
+	ImageInfo see(AppTarget target, Path outputPath);
 
 	/**
 	 * Simulates a mouse click at the specified (x, y) coordinates within the given application target.

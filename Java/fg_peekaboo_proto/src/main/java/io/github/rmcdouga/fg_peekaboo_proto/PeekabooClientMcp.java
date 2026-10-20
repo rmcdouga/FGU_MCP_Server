@@ -24,6 +24,10 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
  * This class manages the Peekaboo MCP server and provides methods to interact with it, 
  * such as capturing images of application windows.
  * 
+ * It was the first implementation of the PeekabooClient interface, and it uses the MCP protocol to communicate with the 
+ * Peekaboo server.  It is no longer complete, as the PeekabooClientCli implementation is now preferred for 
+ * interacting with Peekaboo.
+ * 
  */
 public class PeekabooClientMcp implements PeekabooClient {
 	private static final Pattern PID_PATTERN = Pattern.compile("PID:\\s*(\\d+)");
@@ -118,7 +122,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 	}
 	
 	@Override
-	public void see(AppTarget target, Path outputPath) {
+	public ImageInfo see(AppTarget target, Path outputPath) {
 		CallToolResult toolResult = client.callTool(CallToolRequest.builder("see")
 									   							   .arguments(Map.of(
 									   									   "app_target", target.value(),
@@ -132,7 +136,7 @@ public class PeekabooClientMcp implements PeekabooClient {
 		if (toolResult.isError()) {
 			throw new PeekabooClientException("Error calling 'see' tool: " + toolResult.toString());
 		}
-		
+		throw new UnsupportedOperationException("The 'see' tool is not yet implemented to return ImageInfo.");
 	}
 	
 	/**

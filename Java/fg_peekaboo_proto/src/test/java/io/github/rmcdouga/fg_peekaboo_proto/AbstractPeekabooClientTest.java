@@ -14,6 +14,8 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.github.rmcdouga.fg_peekaboo_proto.PeekabooClient.ImageInfo;
+
 
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)
@@ -62,10 +64,14 @@ public abstract class AbstractPeekabooClientTest {
 	void testSee(@TempDir Path tempDir) {
 		validateFgProcessId();
 		Path screenshotPath = tempDir.resolve("PeekabooMcpClientTest_testSee_screenshot.png");
-		underTest.see(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
+		ImageInfo seeResult = underTest.see(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
 		
 		assertThat(screenshotPath).as("Screenshot file should exist after see command.")
 								  .existsNoFollowLinks();
+		assertThat(seeResult.width()).as("Image width should be greater than 0.")
+									.isGreaterThan(0);
+		assertThat(seeResult.height()).as("Image height should be greater than 0.")
+									.isGreaterThan(0);
 	}
 
 	@Test

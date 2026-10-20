@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,17 +39,25 @@ public class PeekabooClientCli implements PeekabooClient {
 	}
 
 	@Override
-	public void see(AppTarget target, Path outputPath) {
+	public ImageInfo see(AppTarget target, Path outputPath) {
 		String cliTargetArg = switch (target) {
 			case AppNameTarget appNameTarget -> throw new IllegalArgumentException("AppNameTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
 			case ProcessTarget processTarget -> "--pid";
 			case FrontMostTarget frontMostTarget -> throw new IllegalArgumentException("FrontMostTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
 		};
 		String json = callPeekabooCli("see", cliTargetArg, target.cliValue(), "--path", outputPath.toString(), "--no-elements", JSON_ARG);
+
+		// Parse the JSON output to extract image size information
 		JsonData jsonData = jsonDataFactory.fromJsonString(json);
-		Integer imgSizeX = jsonData.getIntAt("/data/observations[0]/coordinates/image_size_pixels/width").orElseThrow(()->new PeekabooClientException("No image width returned from 'see' tool."));
-		Integer imgSizeY = jsonData.getIntAt("/data/observations[0]/coordinates/image_size_pixels/height").orElseThrow(()->new PeekabooClientException("No image height returned from 'see' tool."));
-		System.out.println("Image size: " + imgSizeX + "x" + imgSizeY);
+		JsonData observations = jsonData.arrayAt("/data/observations")
+										.findFirst()
+										.orElseThrow(()->new PeekabooClientException("No observations returned from 'see' tool."));
+		Integer imgSizeX = observations.getIntAt("/coordinates/image_size_pixels/width")
+									   .orElseThrow(()->new PeekabooClientException("No image width returned from 'see' tool."));
+		Integer imgSizeY = observations.getIntAt("/coordinates/image_size_pixels/height")
+									   .orElseThrow(()->new PeekabooClientException("No image height returned from 'see' tool."));
+	
+		return new ImageInfo(imgSizeX, imgSizeY);
 	}
 
 	@Override
