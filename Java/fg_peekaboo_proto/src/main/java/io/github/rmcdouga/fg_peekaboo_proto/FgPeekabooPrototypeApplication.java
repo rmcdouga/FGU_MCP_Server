@@ -113,7 +113,7 @@ public class FgPeekabooPrototypeApplication {
     	return builder -> builder.defaultOptions(ChatOptions.builder().temperature(0.0)); // Make the model deterministic for testing purposes
     }
 	
-	@Profile("!integration-test")
+	@Profile("!disable-main-app-runner")
 	@Bean
     ApplicationRunner callPeekabooDirectly(PeekabooClient peekabooClient, ChatClient.Builder chatClientBuilder, UiLocator uiLocator) {
         return _ -> {

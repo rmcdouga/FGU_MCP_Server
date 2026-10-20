@@ -20,7 +20,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @Disabled("This test is only for manual integration testing on a machine with both Ollama and Peekaboo installed.")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ActiveProfiles({ "integration-test"})
+@ActiveProfiles({ "disable-main-app-runner"})
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)
 class FantasyGroundsAppIT {

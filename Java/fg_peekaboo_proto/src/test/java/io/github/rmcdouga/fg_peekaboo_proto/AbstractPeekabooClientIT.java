@@ -17,15 +17,16 @@ import org.junit.jupiter.api.io.TempDir;
 import io.github.rmcdouga.fg_peekaboo_proto.PeekabooClient.ImageInfo;
 
 
+@Disabled("This test is only for manual integration testing on a machine with both Fantasy Grounds and Peekaboo installed.")
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)
-public abstract class AbstractPeekabooClientTest {
+public abstract class AbstractPeekabooClientIT {
 	private static final String FG_BUNDLE_ID = "unity.SmiteWorks.Fantasy Grounds"; // The bundle identifier for Fantasy Grounds (macOS)
 
 	private final PeekabooClient underTest;
 	private long fgProcessId;
 	
-	public AbstractPeekabooClientTest(PeekabooClient underTest) {
+	public AbstractPeekabooClientIT(PeekabooClient underTest) {
 		this.underTest = underTest;
 	}
 
