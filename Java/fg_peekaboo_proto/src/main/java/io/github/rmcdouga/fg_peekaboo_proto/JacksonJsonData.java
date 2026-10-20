@@ -3,6 +3,8 @@ package io.github.rmcdouga.fg_peekaboo_proto;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonPointer;
@@ -87,6 +89,62 @@ public class JacksonJsonData implements JsonData {
 		return at(jsonDataPtr, JsonNode::asStringOpt);
 	}
 
+	/**
+	 * Returns the JsonData of the JsonNode pointed at using a JsonPointer string.
+	 * 
+	 * @param jsonPtr
+	 * @return
+	 */
+	@Override
+	public Optional<JsonData> subsetAt(String jsonPtr) {
+		return subsetAt(pointer(jsonPtr));
+	}
+	
+	/**
+	 * Returns the JsonData of the JsonNode pointed at using a JsonPointer.
+	 * 
+	 * @param jsonPtr
+	 * @return
+	 */
+	private Optional<JsonData> subsetAt(JsonDataPointer jsonDataPtr) {
+		if (!(jsonDataPtr instanceof JacksonJsonDataPointer jacksonPtr)) {
+			throw new IllegalArgumentException("Expected JacksonJsonDataPointer, got: " + jsonDataPtr.getClass().getName());
+		}
+		JsonNode node = rootNode.at(jacksonPtr.jsonPointer);
+		return node.isContainer() ? Optional.of(JacksonJsonData.parseJson(node.toPrettyString())) : Optional.empty();
+	}
+	
+	/**
+	 * Returns a Stream of JsonData of the Array pointed at using a JsonPointer String
+	 * 
+	 * @param jsonPtr - String containing JsonPointer
+	 * @return
+	 */
+	@Override
+	public Stream<JsonData> arrayAt(String jsonPtr) {
+		return arrayAt(pointer(jsonPtr));
+	}
+
+	/**
+	 * Returns a Stream of JsonData of the Array pointed at using a JsonPointer String
+	 * 
+	 * @param jsonDataPtr - JsonPointer
+	 * @return
+	 */
+	private Stream<JsonData> arrayAt(JsonDataPointer jsonDataPtr) {
+		if (!(jsonDataPtr instanceof JacksonJsonDataPointer jacksonPtr)) {
+			throw new IllegalArgumentException("Expected JacksonJsonDataPointer, got: " + jsonDataPtr.getClass().getName());
+		}
+		JsonNode node = rootNode.at(jacksonPtr.jsonPointer);
+		if (!node.isArray()) { return Stream.empty(); }
+		// We have an array, convert it to a list of JsonData
+		Iterable<JsonNode> iterable = () -> node.iterator();
+		return StreamSupport.stream(iterable.spliterator(), false)	// get stream of JsonNodes
+							.map(JsonNode::toPrettyString)			// convert to Strings
+							.map(JacksonJsonData::parseJson);					// convert back to JsonData
+	}
+	
+	
 	private <T> Optional<T> at(JsonDataPointer jsonDataPtr, Function<JsonNode, Optional<T>> extractor) {
 		if (!(jsonDataPtr instanceof JacksonJsonDataPointer jacksonPtr)) {
 			throw new IllegalArgumentException("Expected JacksonJsonDataPointer, got: " + jsonDataPtr.getClass().getName());
@@ -115,6 +173,11 @@ public class JacksonJsonData implements JsonData {
 			return jsonPointer.toString();
 		}
 	}
-	
 
+	@Override
+	public String toString() {
+		return rootNode.toPrettyString();
+	}
+	
+	
 }

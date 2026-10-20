@@ -50,6 +50,130 @@ class JacksonJsonDataTest {
 			  ]
 			}
 			""";
+	
+	private static final String SEE_JSON = """
+			{
+			  "data" : {
+			    "files" : [
+			      {
+			        "item_label" : "Fantasy Grounds",
+			        "mime_type" : "image/png",
+			        "window_index" : 0,
+			        "window_id" : 13556,
+			        "path" : "/var/folders/ql/8mk4yjnj56g2rwvf2_75yvbh0000gn/T/junit-5309488686238177626/PeekabooMcpClientTest_testSee_screenshot.png",
+			        "window_title" : "Fantasy Grounds"
+			      }
+			    ],
+			    "observations" : [
+			      {
+			        "warnings" : [
+			
+			        ],
+			        "target" : {
+			          "source" : "window-id",
+			          "window_id" : 13556,
+			          "open_if_needed" : false,
+			          "hints" : [
+			
+			          ],
+			          "bounds" : [
+			            [
+			              0,
+			              33
+			            ],
+			            [
+			              1588,
+			              962
+			            ]
+			          ],
+			          "resolved_kind" : "window-id",
+			          "requested_kind" : "pid"
+			        },
+			        "coordinates" : {
+			          "screen_index" : 0,
+			          "coordinate_space" : "global_display_points",
+			          "logical_bounds" : [
+			            [
+			              0,
+			              33
+			            ],
+			            [
+			              1588,
+			              962
+			            ]
+			          ],
+			          "image_size_pixels" : {
+			            "width" : 1588,
+			            "height" : 962
+			          },
+			          "scale_factor" : 1
+			        },
+			        "spans" : [
+			          {
+			            "metadata" : {
+			
+			            },
+			            "name" : "state.snapshot",
+			            "duration_ms" : 35.703791
+			          },
+			          {
+			            "metadata" : {
+			
+			            },
+			            "name" : "target.resolve",
+			            "duration_ms" : 4.661875
+			          },
+			          {
+			            "metadata" : {
+			              "engine" : "CGWindowList"
+			            },
+			            "name" : "capture.window",
+			            "duration_ms" : 84.731208
+			          },
+			          {
+			            "metadata" : {
+			
+			            },
+			            "name" : "output.write",
+			            "duration_ms" : 0.823667
+			          },
+			          {
+			            "metadata" : {
+			
+			            },
+			            "name" : "output.raw.write",
+			            "duration_ms" : 0.820584
+			          },
+			          {
+			            "metadata" : {
+			
+			            },
+			            "name" : "desktop.observe",
+			            "duration_ms" : 227.293458
+			          }
+			        ],
+			        "state_snapshot" : {
+			          "window_count" : 0,
+			          "running_application_count" : 213,
+			          "display_count" : 0
+			        }
+			      }
+			    ]
+			  },
+			  "success" : true,
+			  "target_receipt" : {
+			    "process_start_identity_decimal" : "1792439662433537",
+			    "pid" : 27467,
+			    "process_start_identity" : 1792439662433537,
+			    "window_id" : 13556
+			  },
+			  "debug_logs" : [
+			    "[2026-10-19T20:33:17.140Z] DEBUG: Runtime host: remote onDemand via /Users/robmcdougall/Library/Application Support/Peekaboo/daemon-db70873581b26730.sock (build 4.9.5 (4.9.5))",
+			    "[2026-10-19T20:33:17.140Z] VERBOSE [Operation]: Starting operation {mode=auto, annotate=false, menubar=false, app=none, hasAnalyzePrompt=false, operation=see_command}",
+			    "[2026-10-19T20:33:17.140Z] VERBOSE [Performance]: Starting timer 'see_command'"
+			  ]
+			}
+			""";
 
 	private final JsonData underTest;
 	
@@ -131,4 +255,39 @@ class JacksonJsonDataTest {
 							   .hasValue((short)3);
 		
 	}
+
+	@Test
+	void testArrayAt_FromSeeJson() {
+		//		Optional<JsonData> windowCount = underTest.subsetAt("/data/observations/coordinates/image_size_pixels/width");
+		Optional<Integer> windowCount = JacksonJsonData.parseJson(SEE_JSON)
+														.arrayAt("/data/observations")
+														.findFirst()
+														.get()
+														.getIntAt("/coordinates/image_size_pixels/width")
+														;
+		
+		assertThat(windowCount).as("The '/data/observations[0]/coordinates/image_size_pixels/width' value should be present and equal to 1588.")
+							   .isPresent()
+							   .hasValue(1588);
+	}
+	
+	@Test
+	void testSubsetAt_FromSeeJson() {
+		//		Optional<JsonData> windowCount = underTest.subsetAt("/data/observations/coordinates/image_size_pixels/width");
+		Optional<JsonData> windowCount = JacksonJsonData.parseJson(SEE_JSON)
+														.subsetAt("/target_receipt")
+														;
+		
+		assertThat(windowCount).as("The '/target_receipt' value should be present and equal to json string.")
+							   .isPresent()
+							   .hasValueSatisfying(v->v.toString().equals("""
+									{
+									    "process_start_identity_decimal" : "1792439662433537",
+									    "pid" : 27467,
+									    "process_start_identity" : 1792439662433537,
+									    "window_id" : 13556
+									}
+							   		"""));
+	}
+
 }

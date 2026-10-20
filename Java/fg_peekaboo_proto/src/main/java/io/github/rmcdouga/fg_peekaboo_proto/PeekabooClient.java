@@ -10,6 +10,7 @@ public interface PeekabooClient {
 	public static sealed interface AppTarget {
 		
 		String value();
+		String cliValue();
 		
 		public static final record AppNameTarget(String name) implements AppTarget {
 			public static AppNameTarget of(String name) {
@@ -19,6 +20,11 @@ public interface PeekabooClient {
 			@Override
 			public String value() {
 				return name;
+			}
+
+			@Override
+			public String cliValue() {
+				return value();
 			}
 		}
 		
@@ -31,6 +37,11 @@ public interface PeekabooClient {
 			public String value() {
 				return "PID:" + String.valueOf(processId);
 			}
+
+			@Override
+			public String cliValue() {
+				return String.valueOf(processId);
+			}
 		}
 		
 		public static final record FrontMostTarget() implements AppTarget {
@@ -41,6 +52,11 @@ public interface PeekabooClient {
 			@Override
 			public String value() {
 				return "frontmost";
+			}
+
+			@Override
+			public String cliValue() {
+				return value();
 			}
 		}
 	}

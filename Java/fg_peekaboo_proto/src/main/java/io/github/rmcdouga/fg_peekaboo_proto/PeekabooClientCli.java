@@ -4,8 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.rmcdouga.fg_peekaboo_proto.JsonData.JsonDataFactory;
+import io.github.rmcdouga.fg_peekaboo_proto.PeekabooClient.AppTarget.AppNameTarget;
+import io.github.rmcdouga.fg_peekaboo_proto.PeekabooClient.AppTarget.FrontMostTarget;
+import io.github.rmcdouga.fg_peekaboo_proto.PeekabooClient.AppTarget.ProcessTarget;
 import tools.jackson.databind.json.JsonMapper;
 
 public class PeekabooClientCli implements PeekabooClient {
@@ -13,9 +18,11 @@ public class PeekabooClientCli implements PeekabooClient {
 	private static final String JSON_ARG = "--json";
 	
 	private final Path peekabooCliPath;
+	private final JsonDataFactory jsonDataFactory;
 	
-	public PeekabooClientCli(Path peekabooCliPath) {
+	public PeekabooClientCli(Path peekabooCliPath, JsonDataFactory jsonDataFactory) {
 		this.peekabooCliPath = peekabooCliPath;
+		this.jsonDataFactory = jsonDataFactory;
 	}
 
 	@Override
@@ -32,36 +39,52 @@ public class PeekabooClientCli implements PeekabooClient {
 
 	@Override
 	public void see(AppTarget target, Path outputPath) {
-		// TODO Auto-generated method stub
-
+		String cliTargetArg = switch (target) {
+			case AppNameTarget appNameTarget -> throw new IllegalArgumentException("AppNameTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
+			case ProcessTarget processTarget -> "--pid";
+			case FrontMostTarget frontMostTarget -> throw new IllegalArgumentException("FrontMostTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
+		};
+		String json = callPeekabooCli("see", cliTargetArg, target.cliValue(), "--path", outputPath.toString(), "--no-elements", JSON_ARG);
+		JsonData jsonData = jsonDataFactory.fromJsonString(json);
+		Integer imgSizeX = jsonData.getIntAt("/data/observations[0]/coordinates/image_size_pixels/width").orElseThrow(()->new PeekabooClientException("No image width returned from 'see' tool."));
+		Integer imgSizeY = jsonData.getIntAt("/data/observations[0]/coordinates/image_size_pixels/height").orElseThrow(()->new PeekabooClientException("No image height returned from 'see' tool."));
+		System.out.println("Image size: " + imgSizeX + "x" + imgSizeY);
 	}
 
 	@Override
 	public void click(long pid, int x, int y) {
-		// TODO Auto-generated method stub
-
+		callPeekabooCli("click", "--pid", Long.toString(pid), "--at", Integer.toString(x) + "," + Integer.toString(y), JSON_ARG, FOREGROUND_ARG);
 	}
 
 	@Override
 	public void move(AppTarget target, int x, int y) {
-		// TODO Auto-generated method stub
-
+		String cliTargetArg = switch (target) {
+			case AppNameTarget appNameTarget -> throw new IllegalArgumentException("AppNameTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
+			case ProcessTarget processTarget -> "--pid";
+			case FrontMostTarget frontMostTarget -> throw new IllegalArgumentException("FrontMostTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
+		};
+		callPeekabooCli("move", cliTargetArg, target.cliValue(), "--at", Integer.toString(x) + "," + Integer.toString(y), JSON_ARG, FOREGROUND_ARG);
 	}
 
 	@Override
 	public long appLaunch(String bundleId) {
-		List<String> result = executeCommand(peekabooCliPath, "app", "launch", bundleId, JSON_ARG, FOREGROUND_ARG);
-		System.out.println("appLaunch result: \n" + String.join(System.lineSeparator(), result));
-		return 0;
+		String json = callPeekabooCli("app", "launch", bundleId, JSON_ARG, FOREGROUND_ARG);
+		JsonData jsonData = jsonDataFactory.fromJsonString(json);
+		return jsonData.getLongAt("/data/pid").orElseThrow(()->new PeekabooClientException("No process ID returned from 'app_launch' tool."));
 	}
 
 	@Override
 	public long appFocus(long pid) {
-		// TODO Auto-generated method stub
-		return 0;
+		String json = callPeekabooCli("app", "focus", "--pid", Long.toString(pid), JSON_ARG, FOREGROUND_ARG);
+		return pid;
 	}
 
-
+	private String callPeekabooCli(String... args) {
+		List<String> result = executeCommand(peekabooCliPath, args);
+		String json = String.join("\n", result);
+		System.out.println("peekaboo json result: \n" + json);
+		return json;
+	}
 	
     /**
      * Executes a system command and returns the console output.
