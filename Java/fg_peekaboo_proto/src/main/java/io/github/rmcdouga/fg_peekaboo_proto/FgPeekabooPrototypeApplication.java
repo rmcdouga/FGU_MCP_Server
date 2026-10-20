@@ -4,7 +4,6 @@ package io.github.rmcdouga.fg_peekaboo_proto;
 //import static org.modeljars.catalog.Cactus_Compute_Needle2_Cact_Cq2_Mixed.MODEL;
 //import static org.modeljars.catalog.Qwen3_8b_Q4_K_M.MODEL;
 
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -24,7 +23,6 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.definition.ToolDefinition;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -40,6 +38,7 @@ import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
+import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootApplication
 public class FgPeekabooPrototypeApplication {
@@ -132,10 +131,17 @@ public class FgPeekabooPrototypeApplication {
         };
     }
 
+	@Bean
+	JsonData.JsonDataFactory jsonData(JsonMapper jsonMapper) {
+		var jsonFactory = new JacksonJsonData.JacksonJsonDataFactory(jsonMapper);
+		return jsonFactory::parseJson;
+		
+	}
+	
     @Profile("!exclude-mcp")
     @Bean
-    PeekabooClient peekabooMcpClient(List<McpSyncClient> mcpClients) {
-    	return PeekabooClientMcp.find(mcpClients);
+    PeekabooClient peekabooMcpClient(List<McpSyncClient> mcpClients, JsonData.JsonDataFactory jsonDataFactory) {
+    	return new PeekabooClientCli(Path.of("/", "opt", "homebrew", "bin", "peekaboo"), jsonDataFactory);
     }
     
     @Profile("!exclude-mcp")

@@ -7,6 +7,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import io.github.rmcdouga.fg_peekaboo_proto.JacksonJsonData.JacksonJsonDataFactory;
+import tools.jackson.databind.json.JsonMapper;
+
 class JacksonJsonDataTest {
 	private static final String VALID_JSON = """
 			{
@@ -175,10 +178,12 @@ class JacksonJsonDataTest {
 			}
 			""";
 
+	private static final JsonMapper jsonMapper = new JsonMapper();
+	private final JacksonJsonDataFactory jsonFactory = new JacksonJsonDataFactory(jsonMapper);
 	private final JsonData underTest;
 	
 	public JacksonJsonDataTest() {
-		this.underTest = JacksonJsonData.parseJson(VALID_JSON);
+		this.underTest = jsonFactory.parseJson(VALID_JSON);
 	}
 
 	@Test
@@ -259,7 +264,7 @@ class JacksonJsonDataTest {
 	@Test
 	void testArrayAt_FromSeeJson() {
 		//		Optional<JsonData> windowCount = underTest.subsetAt("/data/observations/coordinates/image_size_pixels/width");
-		Optional<Integer> windowCount = JacksonJsonData.parseJson(SEE_JSON)
+		Optional<Integer> windowCount = jsonFactory.parseJson(SEE_JSON)
 														.arrayAt("/data/observations")
 														.findFirst()
 														.get()
@@ -274,7 +279,7 @@ class JacksonJsonDataTest {
 	@Test
 	void testSubsetAt_FromSeeJson() {
 		//		Optional<JsonData> windowCount = underTest.subsetAt("/data/observations/coordinates/image_size_pixels/width");
-		Optional<JsonData> windowCount = JacksonJsonData.parseJson(SEE_JSON)
+		Optional<JsonData> windowCount = jsonFactory.parseJson(SEE_JSON)
 														.subsetAt("/target_receipt")
 														;
 		

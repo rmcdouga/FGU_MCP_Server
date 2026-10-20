@@ -12,26 +12,36 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 public class JacksonJsonData implements JsonData {
-	private static final JsonMapper jsonMapper = new JsonMapper();
+	private final JacksonJsonDataFactory jsonFactory;
 	private final JsonNode rootNode;
-	
-	public static <T> T fromJson(String json, Class<T> clazz) {
-		try {
-			return jsonMapper.readValue(json, clazz);
-		} catch (JacksonException e) {
-			throw new JsonDataException("Failed to parse JSON: (" + e.getMessage() + ")\n" + json, e);
+
+	public static class JacksonJsonDataFactory  {
+		private final JsonMapper jsonMapper;
+		
+		public JacksonJsonDataFactory(JsonMapper jsonMapper) {
+			this.jsonMapper = jsonMapper;
 		}
+
+		public <T> T fromJson(String json, Class<T> clazz) {
+			try {
+				return jsonMapper.readValue(json, clazz);
+			} catch (JacksonException e) {
+				throw new JsonDataException("Failed to parse JSON: (" + e.getMessage() + ")\n" + json, e);
+			}
+		}
+
+		public JsonData parseJson(String json) {
+			try {
+				return new JacksonJsonData(jsonMapper.readTree(json), this);
+			} catch (JacksonException e) {
+				throw new JsonDataException("Failed to parse JSON: (" + e.getMessage() + ")\n" + json, e);
+			}
+		}
+		
 	}
 
-	public static JsonData parseJson(String json) {
-		try {
-			return new JacksonJsonData(jsonMapper.readTree(json));
-		} catch (JacksonException e) {
-			throw new JsonDataException("Failed to parse JSON: (" + e.getMessage() + ")\n" + json, e);
-		}
-	}
-	
-	private JacksonJsonData(JsonNode rootNode) {
+	private JacksonJsonData(JsonNode rootNode, JacksonJsonDataFactory jsonFactory) {
+		this.jsonFactory = jsonFactory;
 		this.rootNode = rootNode;
 	}
 
@@ -111,7 +121,7 @@ public class JacksonJsonData implements JsonData {
 			throw new IllegalArgumentException("Expected JacksonJsonDataPointer, got: " + jsonDataPtr.getClass().getName());
 		}
 		JsonNode node = rootNode.at(jacksonPtr.jsonPointer);
-		return node.isContainer() ? Optional.of(JacksonJsonData.parseJson(node.toPrettyString())) : Optional.empty();
+		return node.isContainer() ? Optional.of(jsonFactory.parseJson(node.toPrettyString())) : Optional.empty();
 	}
 	
 	/**
@@ -141,7 +151,7 @@ public class JacksonJsonData implements JsonData {
 		Iterable<JsonNode> iterable = () -> node.iterator();
 		return StreamSupport.stream(iterable.spliterator(), false)	// get stream of JsonNodes
 							.map(JsonNode::toPrettyString)			// convert to Strings
-							.map(JacksonJsonData::parseJson);					// convert back to JsonData
+							.map(jsonFactory::parseJson);			// convert back to JsonData
 	}
 	
 	

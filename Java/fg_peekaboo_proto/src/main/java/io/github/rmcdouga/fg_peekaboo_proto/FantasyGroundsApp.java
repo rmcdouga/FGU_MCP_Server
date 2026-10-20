@@ -3,6 +3,8 @@ package io.github.rmcdouga.fg_peekaboo_proto;
 import java.util.List;
 import java.util.OptionalLong;
 
+import io.github.rmcdouga.fg_peekaboo_proto.FantasyGroundsApp.FantasyGroundsProcess.InitialWindow.FantasyGroundsTab;
+
 public class FantasyGroundsApp {
 	private static final String FG_PROCESS_NAME = "SmiteWorks"; // The name of the Fantasy Grounds process should contain this
 	private static final String FG_BUNDLE_ID = "unity.SmiteWorks.Fantasy Grounds"; // The bundle identifier for Fantasy Grounds (macOS)
@@ -41,12 +43,52 @@ public class FantasyGroundsApp {
 			this.processId = processId;
 		}
 		
-		public class IntialWindow {
+		/**
+		 * This is the initial window that is created when the Fantasy Grounds process is launched. 
+		 * It contains the FantasyGrounds tab, the My Campaigns tab and the Join a Game tab.
+		 * 
+		 */
+		public static sealed interface InitialWindow {
+			public FantasyGroundsTab fantasyGroundsTab();
+			public MyCampaignsTab myCampaignsTab();
+			public JoinAGameTab joinAGameTab();
 			
+			public static final class FantasyGroundsTab extends InitialWindowImpl implements InitialWindow {
+				Boolean updateAvailable() {
+					throw new UnsupportedOperationException("Not yet implemented");
+				}
+				
+				FantasyGroundsTab performUpdate() {
+					throw new UnsupportedOperationException("Not yet implemented");
+				}
+			}
+
+			public static final class MyCampaignsTab extends InitialWindowImpl implements InitialWindow {
+				
+			}
+
+			public static final class JoinAGameTab extends InitialWindowImpl implements InitialWindow {
+				
+			}
+
 		}
+
+		private static sealed abstract class InitialWindowImpl implements InitialWindow {
+			public FantasyGroundsTab fantasyGroundsTab() {
+				return new FantasyGroundsTab();
+			}
+			public MyCampaignsTab myCampaignsTab() {
+				return new MyCampaignsTab();
+				
+			}
+			public JoinAGameTab joinAGameTab() {
+				return new JoinAGameTab();
+			}
+			
+		}				
 	}
 	
-//	public static FantasyGroundsProcess.IntialWindow startProcess() {
-//		
-//	}
+	public static FantasyGroundsTab startProcess() {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
 }
