@@ -137,43 +137,10 @@ public class FgPeekabooPrototypeApplication {
 		return jsonFactory::parseJson;
 		
 	}
-	
+
     @Profile("!exclude-mcp")
     @Bean
     PeekabooClient peekabooMcpClient(List<McpSyncClient> mcpClients, JsonData.JsonDataFactory jsonDataFactory) {
     	return new PeekabooClientCli(Path.of("/", "opt", "homebrew", "bin", "peekaboo"), jsonDataFactory);
     }
-    
-    @Profile("!exclude-mcp")
-    @Bean
-    ChatClientBuilderCustomizer addMcpTools(ToolCallbackProvider mcpToolCallbacks, @Value("${" + CFG_SHOW_TOOL_INFO + "}") String showToolInfo) {
-    	ToolCallback[] toolCallbacks = mcpToolCallbacks.getToolCallbacks();
-    	System.out.println("Adding MCP tools to ChatClient builder (%d tools):".formatted(toolCallbacks.length));
-    	
-    	List<ToolCallback> tools = List.of(toolCallbacks);
-		tools.stream()
-		 	.forEach(toolCallback -> System.out.println("  - Tool: " + toolCallback.getToolDefinition().name()));
-		
-		// Find the details of a specific tool by name
-		if (showToolInfo != null && !showToolInfo.isBlank()) {
-			showSpecificToolInfo(tools, showToolInfo);
-		}		
-		
-    	return builder -> builder.defaultTools(mcpToolCallbacks);
-    }
-
-	private void showSpecificToolInfo(List<ToolCallback> tools, String toolName) {
-		Optional<ToolDefinition> imageTool = tools.stream()
-				.map(ToolCallback::getToolDefinition)
-				.filter(toolDef -> toolDef.name().equals(toolName))
-				.findFirst()
-				.map(toolDef -> {
-					System.out.println("Details of '" + toolName + "' tool:");
-					System.out.println("  - Name: " + toolDef.name());
-					System.out.println("  - Description: " + toolDef.description());
-					System.out.println("  - Input Schema: " + toolDef.inputSchema());
-					return toolDef;
-				})
-				;
-	}
 }
