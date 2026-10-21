@@ -39,16 +39,21 @@ public class PeekabooClientCli implements PeekabooClient {
 	}
 
 	@Override
-	public ImageInfo see(AppTarget target, Path outputPath) {
+	public SeeInfo see(AppTarget target, Path outputPath) {
 		String cliTargetArg = switch (target) {
-			case AppNameTarget appNameTarget -> throw new IllegalArgumentException("AppNameTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
-			case ProcessTarget processTarget -> "--pid";
-			case FrontMostTarget frontMostTarget -> throw new IllegalArgumentException("FrontMostTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
+			case AppNameTarget _ -> throw new IllegalArgumentException("AppNameTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
+			case ProcessTarget _ -> "--pid";
+			case FrontMostTarget _ -> throw new IllegalArgumentException("FrontMostTarget is not supported for move operation. Use ProcessTarget or FrontMostTarget instead.");
 		};
 		String json = callPeekabooCli("see", cliTargetArg, target.cliValue(), "--path", outputPath.toString(), "--no-elements", JSON_ARG);
 
 		// Parse the JSON output to extract image size information
 		JsonData jsonData = jsonDataFactory.fromJsonString(json);
+		JsonData files = jsonData.arrayAt("/data/files")
+								 .findFirst()
+								 .orElseThrow(()->new PeekabooClientException("No files returned from 'see' tool."));
+		String imagePath = files.getStringAt("/path")
+								.orElseThrow(()->new PeekabooClientException("No image path returned from 'see' tool."));
 		JsonData observations = jsonData.arrayAt("/data/observations")
 										.findFirst()
 										.orElseThrow(()->new PeekabooClientException("No observations returned from 'see' tool."));
@@ -57,7 +62,7 @@ public class PeekabooClientCli implements PeekabooClient {
 		Integer imgSizeY = observations.getIntAt("/coordinates/image_size_pixels/height")
 									   .orElseThrow(()->new PeekabooClientException("No image height returned from 'see' tool."));
 	
-		return new ImageInfo(imgSizeX, imgSizeY);
+		return new SeeInfo(Path.of(imagePath), imgSizeX, imgSizeY);
 	}
 
 	@Override

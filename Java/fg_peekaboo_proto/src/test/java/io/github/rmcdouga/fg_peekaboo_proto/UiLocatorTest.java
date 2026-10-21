@@ -13,19 +13,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.ChatClientBuilderCustomizer;
-import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.ActiveProfiles;
 
+import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonBoundingBox;
 import io.github.rmcdouga.fg_peekaboo_proto.UiLocator.ButtonClickLocation;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -35,6 +27,11 @@ class UiLocatorTest {
 	private static final Path UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png");
 	private static final Path NO_UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithoutUpdate.png");
 
+	// TODO: IMAGE SIZE is currently hardcoded, but it should be dynamically determined from the screenshot image.
+	//       This is a temporary solution until we can get the actual image size from the screenshot.
+	private static final int IMAGE_SIZE_X = 3176; // 1588 vs 1598 (latter is real)
+	private static final int IMAGE_SIZE_Y = 1924; // 962 vs 994
+	
 	@ParameterizedTest
 	@CsvSource({
 		"MY CAMPAIGNS, 820, 80, 1580, 220",
@@ -45,7 +42,9 @@ class UiLocatorTest {
 		assertNotNull(uiLocator);
 		
 		// Act
-		ButtonClickLocation buttonLocation = uiLocator.locateButton(buttonName, UPDATE_AVAILABLE_SCREENSHOT_PATH).orElseThrow();
+		ButtonClickLocation buttonLocation = uiLocator.locateButton(buttonName, UPDATE_AVAILABLE_SCREENSHOT_PATH)
+													  .map(box -> ButtonClickLocation.fromButtonBoundingBox(box, IMAGE_SIZE_X, IMAGE_SIZE_Y))
+													  .orElseThrow();
 		log.atDebug().log(()->buttonName +" button Location: " + buttonLocation);
 		
 		// Assert
@@ -68,15 +67,17 @@ class UiLocatorTest {
 		assertNotNull(uiLocator);
 		
 		// Act
-		Optional<ButtonClickLocation> buttonLocation = uiLocator.locateButton(buttonName, NO_UPDATE_AVAILABLE_SCREENSHOT_PATH);
+		Optional<ButtonBoundingBox> buttonBoundingBox = uiLocator.locateButton(buttonName, NO_UPDATE_AVAILABLE_SCREENSHOT_PATH);
 		
 		// Assert
 		if (expectedXmin == 0 && expectedYmin == 0 && expectedXmax == 0 && expectedYmax == 0) {
-			assertThat(buttonLocation)
+			assertThat(buttonBoundingBox)
 				.as("Button coordinate must be empty when the button is not found")
 				.isEmpty();
 			return;
 		} else {
+			var buttonLocation = buttonBoundingBox
+				.map(box -> ButtonClickLocation.fromButtonBoundingBox(box, IMAGE_SIZE_X, IMAGE_SIZE_Y));
 			assertThat(buttonLocation)
 				.as("Button coordinate must be present when the button is found")
 				.isPresent();
@@ -95,7 +96,7 @@ class UiLocatorTest {
 		assertNotNull(uiLocator);
 		
 		// Act
-		Optional<ButtonClickLocation> buttonLocation = uiLocator.locateButton("INVALID BUTTON NAME", UPDATE_AVAILABLE_SCREENSHOT_PATH);
+		Optional<ButtonBoundingBox> buttonLocation = uiLocator.locateButton("INVALID BUTTON NAME", UPDATE_AVAILABLE_SCREENSHOT_PATH);
 		
 		// Assert
 		assertThat(buttonLocation)

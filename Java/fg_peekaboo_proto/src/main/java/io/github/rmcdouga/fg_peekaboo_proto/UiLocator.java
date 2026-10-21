@@ -16,13 +16,34 @@ import org.springframework.util.MimeType;
 public class UiLocator {
 	private static final Logger log = LoggerFactory.getLogger(UiLocator.class);
 	
-	// TODO: IMAGE SIZE is currently hardcoded, but it should be dynamically determined from the screenshot image.
-	//       This is a temporary solution until we can get the actual image size from the screenshot.
-	private static final int IMAGE_SIZE_X = 3176; // 1588 vs 1598 (latter is real)
-	private static final int IMAGE_SIZE_Y = 1924; // 962 vs 994
-	
+	/**
+	 * @param buttonName
+	 * @param xmin Minimum X coordinate of the button bounding box in 0-999 range (model output)
+	 * @param ymin Minimum Y coordinate of the button bounding box in 0-999 range (model output)
+	 * @param xmax Maximum X coordinate of the button bounding box in 0-999 range (model output)
+	 * @param ymax Maximum Y coordinate of the button bounding box in 0-999 range (model output)
+	 */
+	public record ButtonBoundingBox(String buttonName, int xmin, int ymin, int xmax, int ymax) {	
+		public String toString() {
+			return buttonName + ": " +  xmin + "," + ymin + "," + xmax + "," + ymax;
+		}
+	};
+
+	/**
+	 * @param x Button click location X coordinate in pixels
+	 * @param y Button click location Y coordinate in pixels
+	 */
 	public record ButtonClickLocation(int x, int y) {
-		public static ButtonClickLocation fromBoundingBox(int xmin, int ymin, int xmax, int ymax) {
+		/**
+		 * Creates a ButtonClickLocation from the center of a bounding box defined by its minimum and maximum coordinates.
+		 * 
+		 * @param xmin Bounding box minimum X coordinate in pixels
+		 * @param ymin Bounding box minimum Y coordinate in pixels
+		 * @param xmax Bounding box maximum X coordinate in pixels
+		 * @param ymax Bounding box maximum Y coordinate in pixels
+		 * @return A ButtonClickLocation representing the center of the bounding box
+		 */
+		private static ButtonClickLocation fromBoundingBox(int xmin, int ymin, int xmax, int ymax) {
 			log.atDebug().log("Button Location: {}, {}, xmax: {}, ymax {}", xmin, ymin, xmax, ymax);
 			int centerX = (xmin + xmax) / 2;
 			int centerY = (ymin + ymax) / 2;
@@ -31,6 +52,17 @@ public class UiLocator {
 		
 		public String toString() {
 			return x + "," + y;
+		}
+		// ButtonClickLocation.fromBoundingBox(from1000(result.xmin,3176), from1000(result.ymin,1924), from1000(result.xmax,3176), from1000(result.ymax,1924)
+		// 		log.atDebug().log(()->"Model response (pixels): " + from1000(result.xmin,IMAGE_SIZE_X) + "," + from1000(result.ymin,IMAGE_SIZE_Y) + "," + from1000(result.xmax,3176) + "," + from1000(result.ymax,1924));
+
+		public static ButtonClickLocation fromButtonBoundingBox(ButtonBoundingBox box, int width, int height) {
+			return ButtonClickLocation.fromBoundingBox(from1000(box.xmin,width), from1000(box.ymin,height), from1000(box.xmax,width), from1000(box.ymax,height));
+		}
+
+		// Model returns coordinates in 0-1000 range, but the actual screenshot is in pixels. This method converts the model's coordinates to actual pixel coordinates.
+		private static int from1000(int value, int maxValue) {
+			return value * maxValue / 1000;
 		}
 	}
 	
@@ -44,12 +76,7 @@ public class UiLocator {
 		this.chatClient = chatClient;
 	}
 	
-	public Optional<ButtonClickLocation> locateButton(String buttonText, Path uiScreenshotPath) {
-		final record ButtonBoundingBox(String buttonName, int xmin, int ymin, int xmax, int ymax) {	
-			public String toString() {
-				return buttonName + ": " +  xmin + "," + ymin + "," + xmax + "," + ymax;
-			}
-		};
+	public Optional<ButtonBoundingBox> locateButton(String buttonText, Path uiScreenshotPath) {
 		
 		@Nullable 
 		ButtonBoundingBox result = chatClient.prompt()
@@ -62,10 +89,9 @@ public class UiLocator {
 					  					  			);
 			
 		log.atDebug().log(()->"Model response: {}" + (result == null ? "null" : result.toString()));
-		log.atDebug().log(()->"Model response (pixels): " + from1000(result.xmin,IMAGE_SIZE_X) + "," + from1000(result.ymin,IMAGE_SIZE_Y) + "," + from1000(result.xmax,3176) + "," + from1000(result.ymax,1924));
 		return result.xmin == 0 && result.ymin == 0 && result.xmax == 0 && result.ymax == 0 
 				? Optional.empty()
-				: Optional.of(ButtonClickLocation.fromBoundingBox(from1000(result.xmin,3176), from1000(result.ymin,1924), from1000(result.xmax,3176), from1000(result.ymax,1924)));
+				: Optional.of(result);
 	}
 
 	private Media toMedia(Path uiScreenshotPath) {
@@ -76,10 +102,5 @@ public class UiLocator {
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to read screenshot file: " + uiScreenshotPath, e);
 		}
-	}
-
-	// Model returns coordinates in 0-1000 range, but the actual screenshot is in pixels. This method converts the model's coordinates to actual pixel coordinates.
-	private int from1000(int value, int maxValue) {
-		return value * maxValue / 1000;
 	}
 }

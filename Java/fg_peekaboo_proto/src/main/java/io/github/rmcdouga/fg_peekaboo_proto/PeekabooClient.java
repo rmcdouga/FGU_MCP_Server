@@ -100,9 +100,9 @@ public interface PeekabooClient {
 	 */
 	void image(AppTarget target, ImageScale scale);
 
-	record ImageInfo(int width, int height) {
-		public static ImageInfo of(int width, int height) {
-			return new ImageInfo(width, height);
+	record SeeInfo(Path screenshotImage, int imageWidth, int imageHeight) {
+		public static SeeInfo of(Path screenshotImage, int imageWidth, int imageHeight) {
+			return new SeeInfo(screenshotImage, imageWidth, imageHeight);
 		}
 	}
 	/**
@@ -114,7 +114,7 @@ public interface PeekabooClient {
 	 * 
 	 * @throws IllegalStateException if there is an error calling the 'see' tool on the Peekaboo MCP server.
 	 */
-	ImageInfo see(AppTarget target, Path outputPath);
+	SeeInfo see(AppTarget target, Path outputPath);
 
 	/**
 	 * Simulates a mouse click at the specified (x, y) coordinates within the given application target.

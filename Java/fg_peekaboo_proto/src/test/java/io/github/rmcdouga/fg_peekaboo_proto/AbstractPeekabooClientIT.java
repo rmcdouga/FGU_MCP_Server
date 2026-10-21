@@ -14,7 +14,7 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 
-import io.github.rmcdouga.fg_peekaboo_proto.PeekabooClient.ImageInfo;
+import io.github.rmcdouga.fg_peekaboo_proto.PeekabooClient.SeeInfo;
 
 
 @Disabled("This test is only for manual integration testing on a machine with both Fantasy Grounds and Peekaboo installed.")
@@ -65,13 +65,13 @@ public abstract class AbstractPeekabooClientIT {
 	void testSee(@TempDir Path tempDir) {
 		validateFgProcessId();
 		Path screenshotPath = tempDir.resolve("PeekabooMcpClientTest_testSee_screenshot.png");
-		ImageInfo seeResult = underTest.see(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
+		SeeInfo seeResult = underTest.see(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
 		
 		assertThat(screenshotPath).as("Screenshot file should exist after see command.")
 								  .existsNoFollowLinks();
-		assertThat(seeResult.width()).as("Image width should be greater than 0.")
+		assertThat(seeResult.imageWidth()).as("Image width should be greater than 0.")
 									.isGreaterThan(0);
-		assertThat(seeResult.height()).as("Image height should be greater than 0.")
+		assertThat(seeResult.imageHeight()).as("Image height should be greater than 0.")
 									.isGreaterThan(0);
 	}
 
