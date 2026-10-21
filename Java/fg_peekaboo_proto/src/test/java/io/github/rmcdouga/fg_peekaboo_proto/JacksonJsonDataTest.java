@@ -3,6 +3,7 @@ package io.github.rmcdouga.fg_peekaboo_proto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -293,6 +294,34 @@ class JacksonJsonDataTest {
 									    "window_id" : 13556
 									}
 							   		"""));
+	}
+
+	@Test
+	void testArrays_FromSeeJson() {
+		//		Optional<JsonData> windowCount = underTest.subsetAt("/data/observations/coordinates/image_size_pixels/width");
+		JsonData observations = jsonFactory.parseJson(SEE_JSON).arrayAt("/data/observations")
+										   .findFirst()
+										   .orElseThrow();
+
+		List<JsonData> logicalBounds = observations.arrayAt("/coordinates/logical_bounds").toList();
+
+		assertThat(logicalBounds).as("The '/data/observations[0]/coordinates/logical_bounds' value should be present and contain two elements, each of which is an array of two integers.")
+							   .hasSize(2)
+							   .allSatisfy(v->assertThat(v.toString()).matches("\\[\\s*\\d+\\s*,\\s*\\d+\\s*\\]"));
+		
+		JsonData firstBound = logicalBounds.getFirst();
+		
+		// Extract the two integers from the first bound array
+		Optional<Integer> firstX = firstBound.getIntAt("/0");
+		Optional<Integer> firstY = firstBound.getIntAt("/1");
+		
+		assertThat(firstX).as("The first element of the first logical bound should be an integer.")
+						  .isPresent()
+						  .hasValue(0);
+		assertThat(firstY).as("The second element of the first logical bound should be an integer.")
+						  .isPresent()
+						  .hasValue(33);
+		
 	}
 
 }
