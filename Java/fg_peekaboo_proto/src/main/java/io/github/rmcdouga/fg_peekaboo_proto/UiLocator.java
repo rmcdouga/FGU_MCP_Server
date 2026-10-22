@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -76,7 +78,14 @@ public class UiLocator {
 		this.chatClient = chatClient;
 	}
 	
-	public Optional<ButtonBoundingBox> locateButton(String buttonText, Path uiScreenshotPath) {
+	/**
+	 * Locates the bounding box of a button with the specified text in the given UI screenshot.
+	 * 
+	 * @param buttonText 		target text of the button to locate
+	 * @param uiScreenshotPath	path to the UI screenshot image file
+	 * @return					Optional containing the ButtonBoundingBox if found, or an empty Optional if not found	
+	 */
+	public Optional<ButtonBoundingBox> locateButton(Path uiScreenshotPath, String buttonText) {
 		
 		@Nullable 
 		ButtonBoundingBox result = chatClient.prompt()
@@ -103,4 +112,21 @@ public class UiLocator {
 			throw new UncheckedIOException("Failed to read screenshot file: " + uiScreenshotPath, e);
 		}
 	}
+	
+	public boolean doesScreenshotContainTexts(Path uiScreenshotPath, List<String> text) {
+		String textList = text.stream().collect(Collectors.joining("\", \"", "[\"", "\"]"));
+		@Nullable 
+		Boolean result = chatClient.prompt()
+					  					  	 .user(p->p.media(toMedia(uiScreenshotPath))
+					  					  			   .text("Does this screenshot contain all the following texts: " + textList + "? Return true or false.")
+					  					  		  )
+					  					  	 .call()
+					  					  	 .entity(Boolean.class, spec -> spec.useProviderStructuredOutput()
+					  					  			 									  .validateSchema()
+					  					  			);
+			
+		log.atDebug().log(()->"Model response: {}" + (result == null ? "null" : result.toString()));
+		return result != null && result;
+	}
+
 }

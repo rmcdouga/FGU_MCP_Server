@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class UiLocatorTest {
 		assertNotNull(uiLocator);
 		
 		// Act
-		ButtonClickLocation buttonLocation = uiLocator.locateButton(buttonName, UPDATE_AVAILABLE_SCREENSHOT_PATH)
+		ButtonClickLocation buttonLocation = uiLocator.locateButton(UPDATE_AVAILABLE_SCREENSHOT_PATH, buttonName)
 													  .map(box -> ButtonClickLocation.fromButtonBoundingBox(box, IMAGE_SIZE_X, IMAGE_SIZE_Y))
 													  .orElseThrow();
 		log.atDebug().log(()->buttonName +" button Location: " + buttonLocation);
@@ -67,7 +68,7 @@ class UiLocatorTest {
 		assertNotNull(uiLocator);
 		
 		// Act
-		Optional<ButtonBoundingBox> buttonBoundingBox = uiLocator.locateButton(buttonName, NO_UPDATE_AVAILABLE_SCREENSHOT_PATH);
+		Optional<ButtonBoundingBox> buttonBoundingBox = uiLocator.locateButton(NO_UPDATE_AVAILABLE_SCREENSHOT_PATH, buttonName);
 		
 		// Assert
 		if (expectedXmin == 0 && expectedYmin == 0 && expectedXmax == 0 && expectedYmax == 0) {
@@ -96,7 +97,7 @@ class UiLocatorTest {
 		assertNotNull(uiLocator);
 		
 		// Act
-		Optional<ButtonBoundingBox> buttonLocation = uiLocator.locateButton("INVALID BUTTON NAME", UPDATE_AVAILABLE_SCREENSHOT_PATH);
+		Optional<ButtonBoundingBox> buttonLocation = uiLocator.locateButton(UPDATE_AVAILABLE_SCREENSHOT_PATH, "INVALID BUTTON NAME");
 		
 		// Assert
 		assertThat(buttonLocation)
@@ -112,7 +113,30 @@ class UiLocatorTest {
 		
 		// Act & Assert
 		assertThatExceptionOfType(UncheckedIOException.class)
-			.isThrownBy(()->uiLocator.locateButton("MY CAMPAIGNS", Path.of(nonExistentFilename)))
+			.isThrownBy(()->uiLocator.locateButton(Path.of(nonExistentFilename), "MY CAMPAIGNS"))
 			.withMessageContaining("NonExistentScreenshot.png");
 	}
+	
+	@Test
+	void testDoesScreenshotContainTexts_containsText(@Autowired UiLocator uiLocator) {
+		// Arrange
+		assertNotNull(uiLocator);
+		
+		// Act & Assert
+		assertThat(uiLocator.doesScreenshotContainTexts(UPDATE_AVAILABLE_SCREENSHOT_PATH, List.of("MY CAMPAIGNS", "UPDATE AVAILABLE")))
+			.as("Screenshot should contain both 'MY CAMPAIGNS' and 'UPDATE AVAILABLE' texts.")
+			.isTrue();
+	}
+	
+	@Test
+	void testDoesScreenshotContainTexts_doesNotContainText(@Autowired UiLocator uiLocator) {
+		// Arrange
+		assertNotNull(uiLocator);
+		
+		// Act & Assert
+		assertThat(uiLocator.doesScreenshotContainTexts(NO_UPDATE_AVAILABLE_SCREENSHOT_PATH, List.of("MY CAMPAIGNS", "UPDATE AVAILABLE")))
+			.as("Screenshot should not contain 'UPDATE AVAILABLE' text.")
+			.isFalse();
+	}
+	
 }
