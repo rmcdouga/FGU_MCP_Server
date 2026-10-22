@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -113,7 +113,14 @@ public class UiLocator {
 		}
 	}
 	
-	public boolean doesScreenshotContainTexts(Path uiScreenshotPath, List<String> text) {
+	/**
+	 * Checks if the given UI screenshot contains all the specified texts.
+	 * 
+	 * @param uiScreenshotPath	path to the UI screenshot image file
+	 * @param text				Collection of texts to check for in the screenshot
+	 * @return					true if all specified texts are found in the screenshot, false otherwise
+	 */
+	public boolean doesScreenshotContainTexts(Path uiScreenshotPath, Collection<String> text) {
 		String textList = text.stream().collect(Collectors.joining("\", \"", "[\"", "\"]"));
 		@Nullable 
 		Boolean result = chatClient.prompt()
