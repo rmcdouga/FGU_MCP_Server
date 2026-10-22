@@ -123,7 +123,7 @@ public class FgPeekabooPrototypeApplication {
 			peekabooClient.image(PeekabooClient.AppTarget.ProcessTarget.of(fgProcessId), PeekabooClient.ImageFormat.PNG, PeekabooClient.ImageScale.NATIVE, screenshotPath);
 //			peekabooClient.see(PeekabooMcpClient.AppTarget.ProcessTarget.of(fgProcessId), screenshotPath);
 			System.out.println("Screenshot saved to '%s'".formatted(screenshotPath.toAbsolutePath().toString()));
-			uiLocator.locateButton("MY CAMPAIGNS", screenshotPath).ifPresentOrElse(
+			uiLocator.locateButton(screenshotPath, "MY CAMPAIGNS").ifPresentOrElse(
 					_-> System.out.println("Found 'MY CAMPAIGNS' button in the screenshot."),
 					() -> System.out.println("'MY CAMPAIGNS' button not found in the screenshot.")
 					);
