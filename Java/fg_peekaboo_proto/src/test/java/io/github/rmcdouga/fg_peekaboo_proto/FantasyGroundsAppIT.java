@@ -51,13 +51,16 @@ class FantasyGroundsAppIT {
 		
 		@Test
 		@Order(2)
-		void testUpdateAvailable() {
+		void testUpdateAvailable() throws InterruptedException {
 			if (underTest.updateAvailable()) {
-				underTest.performUpdate();
+				// TODO: Eventually, there should be an elicitation about whether to perform the update or not.  
+				//       For now, we will just click "OK" to confirm the update.
+				underTest = underTest.performUpdate();
 			}
 			assertThat(underTest.updateAvailable())
 				.as("After performing an update, the Fantasy Grounds tab should not indicate that an update is available.")
 				.isFalse();
+			
 		}
 	}
 }
