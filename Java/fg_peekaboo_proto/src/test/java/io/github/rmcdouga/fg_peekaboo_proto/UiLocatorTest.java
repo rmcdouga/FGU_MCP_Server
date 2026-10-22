@@ -27,6 +27,7 @@ class UiLocatorTest {
 	private static final Logger log = LoggerFactory.getLogger(UiLocatorTest.class);
 	private static final Path UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate.png");
 	private static final Path NO_UPDATE_AVAILABLE_SCREENSHOT_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithoutUpdate.png");
+	private static final Path UPDATE_AVAILABLE_SCREENSHOT_RUN_UPDATER_PATH = Path.of("src/test/resources/screenshots/UiLocatorTest_InitialScreen_WithUpdate_RunUpdater.png");
 
 	// TODO: IMAGE SIZE is currently hardcoded, but it should be dynamically determined from the screenshot image.
 	//       This is a temporary solution until we can get the actual image size from the screenshot.
@@ -125,6 +126,17 @@ class UiLocatorTest {
 		// Act & Assert
 		assertThat(uiLocator.doesScreenshotContainTexts(UPDATE_AVAILABLE_SCREENSHOT_PATH, List.of("MY CAMPAIGNS", "UPDATE AVAILABLE")))
 			.as("Screenshot should contain both 'MY CAMPAIGNS' and 'UPDATE AVAILABLE' texts.")
+			.isTrue();
+	}
+	
+	@Test
+	void testDoesScreenshotContainTexts_containsText_RunUpdater(@Autowired UiLocator uiLocator) {
+		// Arrange
+		assertNotNull(uiLocator);
+		
+		// Act & Assert
+		assertThat(uiLocator.doesScreenshotContainTexts(UPDATE_AVAILABLE_SCREENSHOT_RUN_UPDATER_PATH, List.of("OK")))
+			.as("Screenshot should contain both 'OK' text.")
 			.isTrue();
 	}
 	
