@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.1</version>
+		<version>4.1.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.github.rmcdouga.fg_peekaboo_proto</groupId>
@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>27</java.version>
-		<spring-ai.version>2.0.1</spring-ai.version>
+		<spring-ai.version>2.0.2</spring-ai.version>
 		<modeljars.version>0.1.31</modeljars.version>
 		<models-spring-ai.version>0.3.26</models-spring-ai.version>
 		<qwen3-1.version>3.0.0-q8_0.2</qwen3-1.version>
