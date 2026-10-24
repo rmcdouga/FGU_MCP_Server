@@ -45,7 +45,7 @@
 
 	<properties>
 		<java.version>25</java.version>
-		<spring-ai.version>2.0.1</spring-ai.version>
+		<spring-ai.version>2.0.2</spring-ai.version>
 		<spring-modulith.version>2.1.1</spring-modulith.version>
 		<jreleaser-plugin.version>1.26.0</jreleaser-plugin.version>
 	</properties>
