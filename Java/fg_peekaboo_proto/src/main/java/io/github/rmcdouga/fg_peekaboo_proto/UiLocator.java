@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.content.Media;
 import org.springframework.util.MimeType;
+
+import io.github.rmcdouga.fg_peekaboo_proto.FantasyGroundsApp.FantasyGroundsProcess.InitialWindow.Tab;
 
 public class UiLocator {
 	private static final Logger log = LoggerFactory.getLogger(UiLocator.class);
@@ -97,13 +100,13 @@ public class UiLocator {
 					  					  			 									  .validateSchema()
 					  					  			);
 			
-		log.atDebug().log(()->"Model response: {}" + (result == null ? "null" : result.toString()));
+		log.atDebug().log(()->"locateButton() Model response: {}" + (result == null ? "null" : result.toString()));
 		return result.xmin == 0 && result.ymin == 0 && result.xmax == 0 && result.ymax == 0 
 				? Optional.empty()
 				: Optional.of(result);
 	}
 
-	private Media toMedia(Path uiScreenshotPath) {
+	private static Media toMedia(Path uiScreenshotPath) {
 		try {
 			return Media.builder().mimeType(MimeType.valueOf("image/png"))
 								  .data(Files.readAllBytes(uiScreenshotPath))
@@ -132,8 +135,22 @@ public class UiLocator {
 					  					  			 									  .validateSchema()
 					  					  			);
 			
-		log.atDebug().log(()->"Model response: {}" + (result == null ? "null" : result.toString()));
+		log.atDebug().log(()->"doesScreenshotContainTexts() Model response:" + (result == null ? "null" : result.toString()));
 		return result != null && result;
 	}
 
+	public boolean isTabSelected(Path uiScreenshotPath, Tab tab) {
+		List<Tab> allTabs = List.of(Tab.values());
+		String tabsListStr = allTabs.stream().map(Tab::tabName).map(tn->"**" + tn + "**").collect(Collectors.joining(", "));
+		@Nullable
+		String selectedTab = chatClient.prompt().user(p -> p.media(toMedia(uiScreenshotPath)).text(
+				"In this screenshot, the header section has " + allTabs.size() + " tabs: " + tabsListStr + ". \n\nWhich of the tabs is highlighted?"))
+				.call()
+				.entity(String.class, spec -> spec.useProviderStructuredOutput().validateSchema());
+		log.atDebug().log(() -> "isTabSelected() Model selected tab: " + (selectedTab == null ? "null" : selectedTab));
+		
+		boolean result = selectedTab != null && selectedTab.equalsIgnoreCase(tab.tabName());
+		log.atDebug().log(() -> "isTabSelected() result: '" + tab.tabName() + "' is "+ (result ? "" : "not ") + "selected.");
+		return result;
+	}
 }

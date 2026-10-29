@@ -161,10 +161,24 @@ public class FantasyGroundsApp {
 		 * 
 		 */
 		public static sealed interface InitialWindow {
+			public enum Tab {
+				FANTASY_GROUNDS("FANTASY GROUNDS"),
+				MY_CAMPAIGNS("MY CAMPAIGNS"),
+				JOIN_A_GAME("JOIN A GAME");
+				
+				private final String tabName;
+
+				private Tab(String tabName) {
+					this.tabName = tabName;
+				}
+
+				public String tabName() {
+					return tabName;
+				}
+			}
 			public FantasyGroundsTab fantasyGroundsTab();
 			public MyCampaignsTab myCampaignsTab();
 			public JoinAGameTab joinAGameTab();
-			
 		}
 
 		public final class FantasyGroundsTab extends InitialWindowImpl implements InitialWindow {
@@ -212,7 +226,9 @@ public class FantasyGroundsApp {
 		}
 
 		public final class MyCampaignsTab extends InitialWindowImpl implements InitialWindow {
-			
+			public boolean isSelected() {
+				throw new UnsupportedOperationException("Not yet implemented.");
+			}
 		}
 
 		public final class JoinAGameTab extends InitialWindowImpl implements InitialWindow {
@@ -222,14 +238,16 @@ public class FantasyGroundsApp {
 
 		private sealed abstract class InitialWindowImpl implements InitialWindow {
 			public FantasyGroundsTab fantasyGroundsTab() {
-				return new FantasyGroundsTab();
+				// TODO: Implement a selection of the Fantasy Grounds tab and return a new FantasyGroundsTab instance.
+				throw new UnsupportedOperationException("Not yet implemented.");
 			}
 			public MyCampaignsTab myCampaignsTab() {
+				clickOnButton(Tab.MY_CAMPAIGNS.tabName);
 				return new MyCampaignsTab();
-				
 			}
 			public JoinAGameTab joinAGameTab() {
-				return new JoinAGameTab();
+				// TODO: Implement a selection of the Join a Game tab and return a new JoinAGameTab instance.
+				throw new UnsupportedOperationException("Not yet implemented.");
 			}
 			
 		}				
