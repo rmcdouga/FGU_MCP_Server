@@ -47,7 +47,7 @@
 		<dependency>
 			<groupId>com.integrallis</groupId>
 			<artifactId>models-spring-ai</artifactId>
-			<version>0.3.26</version>
+			<version>0.5.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.modeljars.huggingface</groupId>
