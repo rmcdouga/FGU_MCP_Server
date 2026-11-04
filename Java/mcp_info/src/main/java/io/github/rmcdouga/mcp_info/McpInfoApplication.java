@@ -1,6 +1,7 @@
 package io.github.rmcdouga.mcp_info;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,11 @@ public class McpInfoApplication {
 		        String serverName = client.getServerInfo().name();
 		        List<Tool> tools = client.listTools().tools();
 				System.out.println("Available %s tools (%d):".formatted(serverName, tools.size()));
-		        tools.forEach(tool ->
-		            System.out.println("  - " + tool.name() + ": " + tool.description()));
+		        tools.forEach(tool -> {
+		            System.out.println("  - " + tool.name() + ": " + tool.description());
+		            System.out.println("      - inputSchema: " + Objects.toString(tool.inputSchema()));
+		            System.out.println("      - outputSchema: " + Objects.toString(tool.outputSchema()));
+		        	});
 		        List<Prompt> prompts = client.listPrompts().prompts();
 				System.out.println("Available %s prompts (%d):".formatted(serverName, prompts.size()));
 				prompts.forEach(prompt ->
