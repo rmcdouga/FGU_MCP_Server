@@ -1,6 +1,7 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener.chat.adapters;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,23 +34,27 @@ public class RestClientChatRetriever implements ChatRetriever {
 		super();
 	}
 	
-	public boolean isServerUp() {
+	@Override
+	public Optional<BridgeStatus> bridgeStatus() {
 		try {
 			var status = restClient.get()
 								   .uri(statusUri)
 								   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
 								   .retrieve()
-								   .body(String.class);
-			JsonData responseJson = jsonDataFactory.fromJsonString(status);	// This will throw an exception if the JSON is invalid, which indicates that the server is not up.
-			System.out.println("Server status: " + responseJson.toString());
-			return responseJson.getBooleanAt("/connected")
-							   .orElse(false);
+								   .body(BridgeStatus.class);
+//			JsonData responseJson = jsonDataFactory.fromJsonString(status);	// This will throw an exception if the JSON is invalid, which indicates that the server is not up.
+//			System.out.println("Server status: " + responseJson.toString());
+//			return responseJson.getBooleanAt("/connected")
+//							   .orElse(false);
+			log.info("Server status: {}", status);
+			return Optional.of(status);
+			
 		} catch (JsonDataException e) {
 			log.error("Failed to parse server status JSON: " + e.getMessage(), e);
 		} catch (ResourceAccessException e) {
 			log.error("Failed to access server status endpoint: " + e.getMessage(), e);
 		}
-		return false;
+		return Optional.empty();
 	}
 
 }

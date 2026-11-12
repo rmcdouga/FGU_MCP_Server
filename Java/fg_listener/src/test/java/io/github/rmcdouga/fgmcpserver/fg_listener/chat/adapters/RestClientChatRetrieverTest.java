@@ -113,9 +113,23 @@ class RestClientChatRetrieverTest {
 				.willReturn(WireMock.aResponse()
 						.withHeader("Content-Type", "application/json")
 						.withBody(SERVER_STATUS_RESPONSE_SUCCESS)));
-		boolean serverUp = underTest.isServerUp();
-		assertTrue(serverUp);
-		
+		var status = underTest.bridgeStatus().orElseThrow();
+
+		assertAll(
+				() -> assertEquals("0.5.2", status.version()),
+				() -> assertEquals(2, status.protocol()),
+				() -> assertEquals("05d33dc6d778bf31d224df64", status.serverEpoch()),
+				() -> assertTrue(status.connected()),
+				() -> assertEquals("1794511555-305799", status.session()),
+				() -> assertEquals(2.05, status.lastSeenSeconds()),
+				() -> assertEquals("5E", status.context().ruleset()),
+				() -> assertTrue(status.context().host()),
+				() -> assertEquals("0.4.4", status.context().version()),
+				() -> assertEquals("SimpleTestCampaign", status.context().campaign()),
+				() -> assertEquals(0, status.pendingCommands()),
+				() -> assertEquals(1, status.eventCursor())
+				);
+
 		verify(getRequestedFor(urlEqualTo("/api/status"))
 				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
 				;	
@@ -127,8 +141,22 @@ class RestClientChatRetrieverTest {
 				.willReturn(WireMock.aResponse()
 						.withHeader("Content-Type", "application/json")
 						.withBody(SERVER_STATUS_RESPONSE_FAIL)));
-		boolean serverUp = underTest.isServerUp();
-		assertFalse(serverUp);
+		var status = underTest.bridgeStatus().orElseThrow();
+
+		assertAll(
+				() -> assertEquals("0.5.2", status.version()),
+				() -> assertEquals(2, status.protocol()),
+				() -> assertEquals("edd009ed1bd08b53cffc72f1", status.serverEpoch()),
+				() -> assertFalse(status.connected()),
+				() -> assertEquals("", status.session()),
+				() -> assertNull(status.lastSeenSeconds()),
+				() -> assertNull(status.context().ruleset()),
+				() -> assertNull(status.context().host()),
+				() -> assertNull(status.context().version()),
+				() -> assertNull(status.context().campaign()),
+				() -> assertEquals(0, status.pendingCommands()),
+				() -> assertEquals(0, status.eventCursor())
+				);
 		
 		verify(getRequestedFor(urlEqualTo("/api/status"))
 				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
