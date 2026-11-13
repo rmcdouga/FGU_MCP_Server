@@ -1,6 +1,5 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener.chat.adapters;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -13,7 +12,7 @@ import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever;
 public class RestClientChatRetriever implements ChatRetriever {
 	private static final Logger log = LoggerFactory.getLogger(RestClientChatRetriever.class);
 	private static final String SERVER_STATUS_PATH = "/api/status";
-	private static final String CHAT_EVENTS_PATH = "/api//api/chat/queries";
+	private static final String CHAT_EVENTS_PATH = "/api/chat/queries";
 	
 	private final RestClient restClient;			// RestClient for making HTTP requests to the server.  This is used to retrieve chat messages and check the server status.
 	
@@ -51,22 +50,27 @@ public class RestClientChatRetriever implements ChatRetriever {
 		// the timestamp of the event, and a cursor value for pagination.
 	}
 
-	public List<ChatEvent> pollForChatEvents(int cursor, int waitSeconds) {
+	public Optional<QueryBatch> pollForChatEvents(int cursor, int waitSeconds) {
 		// This method is a placeholder for the logic to poll for chat events from the server.
 		// The actual implementation would involve making an HTTP GET request to the server's chat events endpoint,
 		// passing the appropriate parameters (e.g., cursor, limit, wait time) and handling the response.
-		var events = restClient.get()
-				   .uri(ub->ub.path(CHAT_EVENTS_PATH)
-				   			  .queryParam("after", cursor)
-				   			  .queryParam("limit", 50)
-				   			  .queryParam("wait", waitSeconds)
-				   			  .build())
-				   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
-				   .retrieve()
-				   .body(String.class);
-		
-		log.info("Retrieved chat events: {}", events);
-		return List.of();
+		try {
+			var events = restClient.get()
+					   .uri(ub->ub.path(CHAT_EVENTS_PATH)
+					   			  .queryParam("after", cursor)
+					   			  .queryParam("limit", 50)
+					   			  .queryParam("wait", waitSeconds)
+					   			  .build())
+					   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
+					   .retrieve()
+					   .body(QueryBatch.class);
+			
+			log.info("Retrieved chat events: \n{}", events);
+			return Optional.of(events);
+		} catch (RestClientException e) {
+			log.error("Failed to retrieve chat events JSON: " + e.getMessage(), e);
+		}
+		return Optional.empty();
 	}
 	
 	/*
@@ -83,6 +87,8 @@ int responseCode = connection.getResponseCode();
 
 Initial value of cursor is set to status.event_cursor, and then updated to the last event's cursor after processing each batch of events. 
 This ensures that we only retrieve new events in subsequent requests.
+
+
 
 	 */
 }

@@ -1,5 +1,6 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.jspecify.annotations.*;
@@ -49,4 +50,39 @@ public interface ChatRetriever {
 	}
 	
 	public Optional<BridgeStatus> bridgeStatus();
+	
+	
+	/** A batch of pending chat queries returned by the FG MCP bridge. */
+	public record QueryBatch(
+	        List<QueryEntry> queries,
+	        Integer cursor,
+	        Boolean missedEntries,
+	        String serverEpoch,
+	        String session
+	) {
+
+	    /** A single query: the routing instructions, the raw request, and metadata. */
+	    public record QueryEntry(
+	            String instructions,
+	            ChatRequest request,
+	            String wrappedQuery,
+	            Integer sequence
+	    ) {
+	    }
+
+	    /** The per-query request fields supplied by the server. */
+	    public record ChatRequest(
+	            String queryId,
+	            String question,
+	            String sender,
+	            String requesterRole,
+	            String replyVisibility,
+	            String character,
+	            String campaign,
+	            String ruleset
+	    ) {
+	    }
+	}
+	
+	
 }
