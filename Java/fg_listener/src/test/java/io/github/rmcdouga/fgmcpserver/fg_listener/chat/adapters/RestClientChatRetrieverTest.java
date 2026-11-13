@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 
@@ -81,7 +80,7 @@ class RestClientChatRetrieverTest {
 	public RestClientChatRetrieverTest(@Autowired RestClient.Builder restClientBuilder, 
 									   @Value("${wiremock.server.baseUrl}") String wireMockUrl
 									   ) {
-		this.underTest = new RestClientChatRetriever(restClientBuilder, new DefaultUriBuilderFactory(wireMockUrl).builder());
+		this.underTest = new RestClientChatRetriever(restClientBuilder, wireMockUrl);
 		super();
 	}
 
