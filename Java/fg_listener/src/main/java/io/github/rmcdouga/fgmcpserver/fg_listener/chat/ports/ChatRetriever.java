@@ -83,6 +83,7 @@ public interface ChatRetriever {
 	    ) {
 	    }
 	}
-	
+
+	Optional<QueryBatch> pollForChatEvents(int cursor, int waitSeconds);
 	
 }

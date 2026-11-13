@@ -50,6 +50,7 @@ public class RestClientChatRetriever implements ChatRetriever {
 		// the timestamp of the event, and a cursor value for pagination.
 	}
 
+	@Override
 	public Optional<QueryBatch> pollForChatEvents(int cursor, int waitSeconds) {
 		// This method is a placeholder for the logic to poll for chat events from the server.
 		// The actual implementation would involve making an HTTP GET request to the server's chat events endpoint,
