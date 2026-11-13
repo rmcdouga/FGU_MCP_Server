@@ -4,8 +4,6 @@ import java.util.Objects;
 import java.util.Optional;
 import org.jspecify.annotations.*;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public interface ChatRetriever {
 	public record BridgeStatus(
 	        String version,

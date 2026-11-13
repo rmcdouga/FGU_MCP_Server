@@ -1,5 +1,6 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener.chat.adapters;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -25,7 +26,6 @@ import com.github.tomakehurst.wiremock.recording.SnapshotRecordResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 
 import io.github.rmcdouga.fgmcpserver.fg_listener.FgListenerApplication;
-import io.github.rmcdouga.fgmcpserver.fg_listener.JsonData.JsonDataFactory;
 
 @WireMockTest()
 @SpringBootTest(webEnvironment = WebEnvironment.NONE, 
@@ -79,10 +79,9 @@ class RestClientChatRetrieverTest {
 	private final RestClientChatRetriever underTest;
 
 	public RestClientChatRetrieverTest(@Autowired RestClient.Builder restClientBuilder, 
-									   @Autowired JsonDataFactory jsonDataFactory,
 									   @Value("${wiremock.server.baseUrl}") String wireMockUrl
 									   ) {
-		this.underTest = new RestClientChatRetriever(restClientBuilder, new DefaultUriBuilderFactory(wireMockUrl).builder(), jsonDataFactory);
+		this.underTest = new RestClientChatRetriever(restClientBuilder, new DefaultUriBuilderFactory(wireMockUrl).builder());
 		super();
 	}
 
@@ -108,13 +107,16 @@ class RestClientChatRetrieverTest {
 	}
 	
 	@Test
-	void testStatus_Success() {
+	void testBridgeStatus_Success() {
+		// Arrange
 		stubFor(WireMock.get(WireMock.urlEqualTo("/api/status"))
 				.willReturn(WireMock.aResponse()
 						.withHeader("Content-Type", "application/json")
 						.withBody(SERVER_STATUS_RESPONSE_SUCCESS)));
+		// Act
 		var status = underTest.bridgeStatus().orElseThrow();
 
+		// Assert
 		assertAll(
 				() -> assertEquals("0.5.2", status.version()),
 				() -> assertEquals(2, status.protocol()),
@@ -136,13 +138,17 @@ class RestClientChatRetrieverTest {
 	}
 
 	@Test
-	void testStatus_Failure() {
+	void testBridgeStatus_Failure() {
+		// Arrange
 		stubFor(WireMock.get(WireMock.urlEqualTo("/api/status"))
 				.willReturn(WireMock.aResponse()
 						.withHeader("Content-Type", "application/json")
 						.withBody(SERVER_STATUS_RESPONSE_FAIL)));
+
+		// Act
 		var status = underTest.bridgeStatus().orElseThrow();
 
+		// Assert
 		assertAll(
 				() -> assertEquals("0.5.2", status.version()),
 				() -> assertEquals(2, status.protocol()),
@@ -163,4 +169,43 @@ class RestClientChatRetrieverTest {
 				;	
 	}
 
+	@Test
+	void testBridgeStatus_InvalidJson() {
+		// Arrange
+		stubFor(WireMock.get(WireMock.urlEqualTo("/api/status"))
+				.willReturn(WireMock.aResponse()
+						.withHeader("Content-Type", "application/json")
+						.withBody("{ foo: }")));
+
+		// Act
+		var status = underTest.bridgeStatus();
+
+		// Assert
+		assertThat(status).isEmpty();
+		
+		verify(getRequestedFor(urlEqualTo("/api/status"))
+				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				;	
+	}
+
+	@Test
+	void testBridgeStatus_Unauthorized() {
+		// Arrange
+		// return unauthorized response
+		stubFor(WireMock.get(WireMock.urlEqualTo("/api/status"))
+				.willReturn(WireMock.aResponse()
+						.withStatus(401)
+						.withHeader("Content-Type", "application/json")
+						.withBody("{ \"error\": \"Unauthorized\" }")));
+
+		// Act
+		var status = underTest.bridgeStatus();
+
+		// Assert
+		assertThat(status).isEmpty();
+		
+		verify(getRequestedFor(urlEqualTo("/api/status"))
+				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				;	
+	}
 }
