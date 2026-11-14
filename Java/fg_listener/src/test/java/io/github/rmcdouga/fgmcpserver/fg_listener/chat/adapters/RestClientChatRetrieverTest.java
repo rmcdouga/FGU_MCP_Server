@@ -25,6 +25,10 @@ import com.github.tomakehurst.wiremock.recording.SnapshotRecordResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 
 import io.github.rmcdouga.fgmcpserver.fg_listener.FgListenerApplication;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.BridgeCommand;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.BridgeCommand.Command;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.CommandResponse;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.QueryBatch;
 
 @WireMockTest()
@@ -155,8 +159,33 @@ class RestClientChatRetrieverTest {
 				"session": "1794602634-294694"
 			}
 			""";
-	
-	private final RestClientChatRetriever underTest;
+
+	private static final String COMMAND_REQUEST = """
+{
+	"command": {
+		"action": "chat_reply",
+		"query_id": "1794602634-294694:chat:3",
+		"text": "I’m an AI assistant for this 5E campaign. I can help explain rules, summarize information the group can see, and assist with campaign planning. I don’t have a personal character or experiences of my own.",
+		"spoiler_free": true,
+		"host_only": false,
+		"status_error": false
+	},
+	"timeout": 30,
+	"request_id": "9b9dfb194601484ab5d9daa3fd35bd78",
+	"server_epoch": "45e913d2e607dad3da96e4f2"
+}			
+			""";
+	private static final String COMMAND_RESPONSE = """
+			{
+				"ok": true,
+				"data": {
+					"visibility": "public",
+					"delivered": true
+				}
+			}
+			""";
+
+	private final ChatRetriever underTest;
 
 	public RestClientChatRetrieverTest(@Autowired RestClient.Builder restClientBuilder, 
 									   @Value("${wiremock.server.baseUrl}") String wireMockUrl
@@ -395,5 +424,37 @@ class RestClientChatRetrieverTest {
 				.withQueryParam("wait", WireMock.equalTo("5"))
 				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
 				;
+	}
+	
+	@Test
+	void testBridgeCommand_Success() {
+		// Arrange
+		CommandResponse expected = new CommandResponse(true, new CommandResponse.Data("public", true));
+		stubFor(WireMock.post(WireMock.urlEqualTo("/api/command"))
+				.willReturn(WireMock.aResponse()
+						.withHeader("Content-Type", "application/json")
+						.withBody(COMMAND_RESPONSE)));
+		// Act
+		var status = underTest.bridgeCommand(BridgeCommand.builder()
+														  .command(Command.builder()
+																		  .action("chat_reply")
+																		  .queryId("1794602634-294694:chat:3")
+																		  .text("This is the resulting text from the AI assistant.")
+																		  .spoilerFree(true)
+																		  .hostOnly(false)
+																		  .statusError(false)
+																		  .build())
+														  .timeout(30)
+														  .requestId("9b9dfb194601484ab5d9daa3fd35bd78")
+														  .serverEpoch("45e913d2e607dad3da96e4f2")
+														  .build())
+							   .orElseThrow();
+
+		// Assert
+		assertThat(status).isEqualTo(expected);
+		
+		verify(postRequestedFor(urlEqualTo("/api/command"))
+				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				;	
 	}
 }

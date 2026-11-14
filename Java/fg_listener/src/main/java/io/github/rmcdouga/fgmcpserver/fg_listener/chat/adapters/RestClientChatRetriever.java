@@ -13,6 +13,7 @@ public class RestClientChatRetriever implements ChatRetriever {
 	private static final Logger log = LoggerFactory.getLogger(RestClientChatRetriever.class);
 	private static final String SERVER_STATUS_PATH = "/api/status";
 	private static final String CHAT_EVENTS_PATH = "/api/chat/queries";
+	private static final String BRIDGE_COMMAND_PATH = "/api/command";
 	
 	private final RestClient restClient;			// RestClient for making HTTP requests to the server.  This is used to retrieve chat messages and check the server status.
 	
@@ -44,17 +45,8 @@ public class RestClientChatRetriever implements ChatRetriever {
 		return Optional.empty();
 	}
 
-	record ChatEvent(String type, String message, long timestamp, int cursor) {
-		// This record represents a chat event retrieved from the server.
-		// It contains the type of event (e.g., "message", "join", "leave"), the message content,
-		// the timestamp of the event, and a cursor value for pagination.
-	}
-
 	@Override
 	public Optional<QueryBatch> pollForChatEvents(int cursor, int waitSeconds) {
-		// This method is a placeholder for the logic to poll for chat events from the server.
-		// The actual implementation would involve making an HTTP GET request to the server's chat events endpoint,
-		// passing the appropriate parameters (e.g., cursor, limit, wait time) and handling the response.
 		try {
 			var events = restClient.get()
 					   .uri(ub->ub.path(CHAT_EVENTS_PATH)
@@ -73,23 +65,23 @@ public class RestClientChatRetriever implements ChatRetriever {
 		}
 		return Optional.empty();
 	}
-	
-	/*
-	 * String url = "http://127.0.0.1:18765/api/chat/queries?after=" + cursor + "&limit=50&wait=" + waitSeconds;
-HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-connection.setRequestMethod("GET");
-connection.setRequestProperty("Authorization", "Bearer " + token);
-connection.setRequestProperty("Content-Type", "application/json");
-connection.setConnectTimeout(10000); // 10 seconds
-connection.setReadTimeout((waitSeconds + 10) * 1000); // wait + 10 seconds timeout
 
-int responseCode = connection.getResponseCode();
-// Process the response...
-
-Initial value of cursor is set to status.event_cursor, and then updated to the last event's cursor after processing each batch of events. 
-This ensures that we only retrieve new events in subsequent requests.
-
-
-
-	 */
+	@Override
+	public Optional<CommandResponse> bridgeCommand(BridgeCommand bridgeCommand) {
+		try {
+			var result = restClient.post()
+					   			   .uri(ub->ub.path(BRIDGE_COMMAND_PATH)
+					   					   	  .build())
+					   			   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
+					   			   .body(bridgeCommand)
+					   			   .retrieve()
+					   			   .body(CommandResponse.class);
+			
+			log.info("Sent command, result: \n{}", result);
+			return Optional.of(result);
+		} catch (RestClientException e) {
+			log.error("Failed to send command: " + e.getMessage(), e);
+		}
+		return Optional.empty();
+	}
 }
