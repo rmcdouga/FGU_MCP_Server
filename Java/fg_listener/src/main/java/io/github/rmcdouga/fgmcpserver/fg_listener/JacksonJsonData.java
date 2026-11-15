@@ -1,8 +1,10 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -165,7 +167,19 @@ public class JacksonJsonData implements JsonData {
 	
 	private <T> Optional<T> at(String jsonDataPtr, Function<JsonNode, Optional<T>> extractor) {
 		return at(pointer(jsonDataPtr), extractor);
-	} 
+	}
+
+	private Map<String, JsonData> toMap() {
+		if (rootNode.isObject()) {
+			return rootNode.propertyStream()
+						   .collect(Collectors.toMap(
+									   prop->prop.getKey(),
+									   prop->new JacksonJsonData(prop.getValue(), jsonFactory)
+								   ));
+		} else {
+			throw new IllegalStateException("Root node is not an object, cannot convert to map.");
+		}
+	}
 
 	private static class JacksonJsonDataPointer implements JsonDataPointer {
 		private final JsonPointer jsonPointer;
