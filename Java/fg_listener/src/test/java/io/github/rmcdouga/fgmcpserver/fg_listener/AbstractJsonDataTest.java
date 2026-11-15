@@ -1,11 +1,10 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener;
 
-import static org.hamcrest.Matchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,6 +88,30 @@ public abstract class AbstractJsonDataTest {
 	}
 
 
+	@Test
+	void testToMapOfString() throws Exception {
+		// Arrange
+		String sampleJson = """
+			{
+			  "token": "1234567890",
+			  "port": 18775,
+			  "source_roots": {
+			    "CoreRPG": "/SmiteWorks/Fantasy Grounds/CoreRPG",
+			    "5E": "/SmiteWorks/Fantasy Grounds/5E"
+			  },
+			  "fg_data": "/SmiteWorks/Fantasy Grounds"
+			}""";
+		JsonData underTest = jsonFactory.fromJsonString(sampleJson);
+	
+		// Act
+		Map<String, String> result = underTest.toMapOfString("/source_roots");
+		
+		// Assert
+		assertEquals(2, result.size());
+		assertEquals("/SmiteWorks/Fantasy Grounds/CoreRPG", result.get("CoreRPG"));
+		assertEquals("/SmiteWorks/Fantasy Grounds/5E", result.get("5E"));
+	}
+	
 //	@Test
 //	void testListAtString() throws Exception {
 //		String obj1 = "{ \"obj1\" : \"obj1Value\" }";

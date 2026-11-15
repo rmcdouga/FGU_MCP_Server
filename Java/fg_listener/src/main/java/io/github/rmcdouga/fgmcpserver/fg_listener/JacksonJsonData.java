@@ -169,10 +169,39 @@ public class JacksonJsonData implements JsonData {
 		return at(pointer(jsonDataPtr), extractor);
 	}
 
-	private Map<String, JsonData> toMap() {
+	/**
+	 * Returns a Map of Strings within the JsonData object pointed to.  
+	 * The keys of the map are the property names, and the String values for each property.
+	 * 
+	 * @param jsonPtr - String containing JsonPointer
+	 * @return Map containing the properties of the JsonData object pointed to.
+	 * @throws JsonDataException if this JsonData object is not a JSON object.
+	 */
+	@Override
+	public <T> Map<String, String> toMapOfString(String jsonPtr) {
+		return subsetAt(jsonPtr)
+				.map(JacksonJsonData.class::cast)
+				.map(JacksonJsonData::toMap)
+				.orElse(Map.of())
+				.entrySet()
+				.stream()
+				.collect(Collectors.toUnmodifiableMap(
+						Map.Entry::getKey,
+						e->e.getValue().getStringAt("").orElseThrow(() -> new JsonDataException("Expected string value at " + jsonPtr + "/" + e.getKey()))
+						));
+	}
+	
+	/**
+	 * Returns a Map of objects within this JsonData object.  
+	 * The keys of the map are the property names, and the values are the JsonData objects for each property.
+	 * 
+	 * @return Map containing the properties of this JsonData object.
+	 * @throws JsonDataException if this JsonData object is not a JSON object.
+	 */
+	private Map<String, JacksonJsonData> toMap() {
 		if (rootNode.isObject()) {
 			return rootNode.propertyStream()
-						   .collect(Collectors.toMap(
+						   .collect(Collectors.toUnmodifiableMap(
 									   prop->prop.getKey(),
 									   prop->new JacksonJsonData(prop.getValue(), jsonFactory)
 								   ));

@@ -1,6 +1,7 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -54,5 +55,15 @@ public interface JsonData {
 	 * @return
 	 */
 	Stream<JsonData> arrayAt(String jsonPtr);
+
+	/**
+	 * Returns a Map of Strings within the JsonData object pointed to.  
+	 * The keys of the map are the property names, and the String values for each property.
+	 * 
+	 * @param jsonPtr - String containing JsonPointer
+	 * @return Map containing the properties of the JsonData object pointed to.
+	 * @throws JsonDataException if this JsonData object is not a JSON object.
+	 */
+	<T> Map<String, String> toMapOfString(String jsonPtr);
 
 }
