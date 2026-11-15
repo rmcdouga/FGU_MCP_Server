@@ -1,5 +1,6 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener.chat.adapters;
 
+import java.time.Duration;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -46,13 +47,13 @@ public class RestClientChatRetriever implements ChatRetriever {
 	}
 
 	@Override
-	public Optional<QueryBatch> pollForChatEvents(int cursor, int waitSeconds) {
+	public Optional<QueryBatch> pollForChatEvents(int cursor, Duration waitTime) {
 		try {
 			var events = restClient.get()
 					   .uri(ub->ub.path(CHAT_EVENTS_PATH)
 					   			  .queryParam("after", cursor)
 					   			  .queryParam("limit", 50)
-					   			  .queryParam("wait", waitSeconds)
+					   			  .queryParam("wait", waitTime.toSeconds())
 					   			  .build())
 					   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
 					   .retrieve()

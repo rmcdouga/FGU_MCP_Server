@@ -41,13 +41,31 @@ class ConfigJsonTest {
 	}
 
 	@Test
-	void testFromPath(@TempDir Path tempDir) throws Exception {
+	void testFromPathFullPath(@TempDir Path tempDir) throws Exception {
 		// Arrange
 		var configJsonPath = tempDir.resolve("config.json");
 		Files.writeString(configJsonPath, SAMPLE_JSON);
 		
 		// Act
-		var config = factory.fromPath(configJsonPath);
+		var config = factory.fromPath(configJsonPath);	// Full path to the file.
+		
+		// Assert
+		assertEquals("1234567890", config.token());
+		assertEquals(18775, config.port());
+		assertEquals(2, config.sourceRoots().size());
+		assertEquals("/SmiteWorks/Fantasy Grounds/CoreRPG", config.sourceRoots().get("CoreRPG").toString());
+		assertEquals("/SmiteWorks/Fantasy Grounds/5E", config.sourceRoots().get("5E").toString());
+		assertEquals("/SmiteWorks/Fantasy Grounds", config.fg_data().toString());
+	}
+
+	@Test
+	void testFromPathDirPath(@TempDir Path tempDir) throws Exception {
+		// Arrange
+		var configJsonPath = tempDir.resolve("config.json");
+		Files.writeString(configJsonPath, SAMPLE_JSON);
+		
+		// Act
+		var config = factory.fromPath(tempDir);	// Just the directory path, not the full path to the file.
 		
 		// Assert
 		assertEquals("1234567890", config.token());

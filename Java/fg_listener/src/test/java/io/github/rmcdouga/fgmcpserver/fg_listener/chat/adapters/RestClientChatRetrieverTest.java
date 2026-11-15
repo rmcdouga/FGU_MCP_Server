@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -333,7 +334,7 @@ class RestClientChatRetrieverTest {
 						.withBody(CHAT_EVENTS_RESPONSE_SUCCESS_NO_ENTRIES)));
 
 		// Act
-		QueryBatch events = underTest.pollForChatEvents(0, 5).orElseThrow();
+		QueryBatch events = underTest.pollForChatEvents(0, Duration.ofSeconds(5)).orElseThrow();
 
 		// Assert
 		assertThat(events).usingRecursiveComparison()
@@ -411,7 +412,7 @@ class RestClientChatRetrieverTest {
 						.withBody(CHAT_EVENTS_RESPONSE_SUCCESS_WITH_ENTRIES)));
 
 		// Act
-		var events = underTest.pollForChatEvents(0, 5).orElseThrow();
+		var events = underTest.pollForChatEvents(0, Duration.ofSeconds(5)).orElseThrow();
 		
 		// Assert
 		assertThat(events).usingRecursiveComparison()

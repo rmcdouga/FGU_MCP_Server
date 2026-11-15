@@ -1,5 +1,6 @@
 package io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -84,7 +85,7 @@ public interface ChatRetriever {
 	    }
 	}
 
-	Optional<QueryBatch> pollForChatEvents(int cursor, int waitSeconds);
+	Optional<QueryBatch> pollForChatEvents(int cursor, Duration waitTime);
 
 	/** A command dispatched to the FG MCP bridge, with routing/timeout metadata. */
 	public record BridgeCommand(

@@ -29,6 +29,9 @@ public record ConfigJson(
 		}
 
 		public ConfigJson fromPath(Path configJsonPath) throws JsonDataException, IOException {
+			if (Files.isDirectory(configJsonPath)) {
+				configJsonPath = configJsonPath.resolve("config.json");
+			}
 			return fromString(Files.readString(configJsonPath));
 		}
 
