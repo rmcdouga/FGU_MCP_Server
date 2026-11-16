@@ -26,6 +26,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.recording.SnapshotRecordResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 
+import io.github.rmcdouga.fgmcpserver.fg_listener.ConfigJson;
 import io.github.rmcdouga.fgmcpserver.fg_listener.FgListenerApplication;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.BridgeCommand;
@@ -189,11 +190,14 @@ class RestClientChatRetrieverTest {
 			""";
 
 	private final ChatRetriever underTest;
+	private final String token;
 
 	public RestClientChatRetrieverTest(@Autowired RestClient.Builder restClientBuilder, 
-									   @Value("${wiremock.server.baseUrl}") String wireMockUrl
+									   @Value("${wiremock.server.baseUrl}") String wireMockUrl,
+									   @Autowired ConfigJson configJson
 									   ) {
-		this.underTest = new RestClientChatRetriever(restClientBuilder, /* ACTUAL_SERVER_URL */ wireMockUrl, "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11");
+		this.token = configJson.token();
+		this.underTest = new RestClientChatRetriever(restClientBuilder, /* ACTUAL_SERVER_URL */ wireMockUrl, configJson.token());
 		super();
 	}
 
@@ -245,7 +249,7 @@ class RestClientChatRetrieverTest {
 				);
 
 		verify(getRequestedFor(urlEqualTo("/api/status"))
-				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				.withHeader("Authorization", WireMock.equalTo("Bearer " + token)))
 				;	
 	}
 
@@ -277,7 +281,7 @@ class RestClientChatRetrieverTest {
 				);
 		
 		verify(getRequestedFor(urlEqualTo("/api/status"))
-				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				.withHeader("Authorization", WireMock.equalTo("Bearer " + token)))
 				;	
 	}
 
@@ -297,7 +301,7 @@ class RestClientChatRetrieverTest {
 		
 		
 		verify(getRequestedFor(urlEqualTo("/api/status"))
-				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				.withHeader("Authorization", WireMock.equalTo("Bearer " + token)))
 				;	
 	}
 
@@ -318,7 +322,7 @@ class RestClientChatRetrieverTest {
 		assertThat(status).isEmpty();
 		
 		verify(getRequestedFor(urlEqualTo("/api/status"))
-				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				.withHeader("Authorization", WireMock.equalTo("Bearer " + token)))
 				;	
 	}
 	
@@ -346,7 +350,7 @@ class RestClientChatRetrieverTest {
 				.withQueryParam("after", WireMock.equalTo("0"))
 				.withQueryParam("limit", WireMock.equalTo("50"))
 				.withQueryParam("wait", WireMock.equalTo("5"))
-				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				.withHeader("Authorization", WireMock.equalTo("Bearer " + token)))
 				;
 	}
 
@@ -425,7 +429,7 @@ class RestClientChatRetrieverTest {
 				.withQueryParam("after", WireMock.equalTo("0"))
 				.withQueryParam("limit", WireMock.equalTo("50"))
 				.withQueryParam("wait", WireMock.equalTo("5"))
-				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				.withHeader("Authorization", WireMock.equalTo("Bearer " + token)))
 				;
 	}
 	
@@ -457,7 +461,7 @@ class RestClientChatRetrieverTest {
 		assertThat(status).isEqualTo(expected);
 		
 		verify(postRequestedFor(urlEqualTo("/api/command"))
-				.withHeader("Authorization", WireMock.equalTo("Bearer 9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")))
+				.withHeader("Authorization", WireMock.equalTo("Bearer " + token)))
 				;	
 	}
 }
