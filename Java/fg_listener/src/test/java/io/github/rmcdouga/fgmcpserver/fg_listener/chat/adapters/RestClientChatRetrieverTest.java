@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClient;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
@@ -43,6 +44,7 @@ import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.Query
 		portProperties = "fglistener.bridge.port"
 		)
 	)
+@ActiveProfiles({ "disable-main-app-runner"})
 class RestClientChatRetrieverTest {
 	private static final String ACTUAL_SERVER_URL = "http://127.0.0.1:18765/";
 
