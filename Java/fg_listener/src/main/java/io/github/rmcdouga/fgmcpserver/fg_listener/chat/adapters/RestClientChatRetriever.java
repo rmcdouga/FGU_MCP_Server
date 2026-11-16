@@ -15,6 +15,9 @@ public class RestClientChatRetriever implements ChatRetriever {
 	private static final String SERVER_STATUS_PATH = "/api/status";
 	private static final String CHAT_EVENTS_PATH = "/api/chat/queries";
 	private static final String BRIDGE_COMMAND_PATH = "/api/command";
+	private static final String CHAT_STATUS_PATH = "/api/chat/status"; // POST http://127.0.0.1:18765/api/chat/status
+	private static final String CHAT_PATH = "/api/chat"; // GET http://127.0.0.1:18765/api/chat?after=0&limit=50&private=true
+	
 	
 	private final RestClient restClient;			// RestClient for making HTTP requests to the server.  This is used to retrieve chat messages and check the server status.
 	

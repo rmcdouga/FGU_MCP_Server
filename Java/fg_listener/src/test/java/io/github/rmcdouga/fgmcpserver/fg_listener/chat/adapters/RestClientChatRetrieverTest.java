@@ -118,6 +118,21 @@ class RestClientChatRetrieverTest {
 			}
 			""";
 	
+	// CHAT_STATUS POST
+//	{
+//		"server_epoch": "45e913d2e607dad3da96e4f2",
+//		"session": "1794602634-294694",
+//		"query_id": "1794602634-294694:chat:3",
+//		"state": "idle"
+//	}
+
+	// CHAT_STATUS RESPONSE
+//	{
+//		"ok": true
+//	}
+	
+	// CHAT_PATH GET RESPONSE -> CHAT_LINES_RESPONSE_WITH_ENTRIES
+
 	private static final String CHAT_LINES_RESPONSE_WITH_ENTRIES = """
 			{
 				"lines": [
