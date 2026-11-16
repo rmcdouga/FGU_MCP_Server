@@ -191,7 +191,7 @@ class RestClientChatRetrieverTest {
 	public RestClientChatRetrieverTest(@Autowired RestClient.Builder restClientBuilder, 
 									   @Value("${wiremock.server.baseUrl}") String wireMockUrl
 									   ) {
-		this.underTest = new RestClientChatRetriever(restClientBuilder, /* ACTUAL_SERVER_URL */ wireMockUrl);
+		this.underTest = new RestClientChatRetriever(restClientBuilder, /* ACTUAL_SERVER_URL */ wireMockUrl, "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11");
 		super();
 	}
 

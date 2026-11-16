@@ -18,8 +18,9 @@ public class RestClientChatRetriever implements ChatRetriever {
 	
 	private final RestClient restClient;			// RestClient for making HTTP requests to the server.  This is used to retrieve chat messages and check the server status.
 	
-	public RestClientChatRetriever(RestClient.Builder restClientBuilder, String baseUrl) {
+	public RestClientChatRetriever(RestClient.Builder restClientBuilder, String baseUrl, String token) {
 		this(restClientBuilder.baseUrl(baseUrl)
+				   			  .defaultHeader("Authorization", "Bearer " + token)
 							  .build());
 	}
 
@@ -34,7 +35,6 @@ public class RestClientChatRetriever implements ChatRetriever {
 			var status = restClient.get()
 								   .uri(ub->ub.path(SERVER_STATUS_PATH)
 										      .build())
-								   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
 								   .retrieve()
 								   .body(BridgeStatus.class);
 			log.info("Server status: {}", status);
@@ -55,7 +55,6 @@ public class RestClientChatRetriever implements ChatRetriever {
 					   			  .queryParam("limit", 50)
 					   			  .queryParam("wait", waitTime.toSeconds())
 					   			  .build())
-					   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
 					   .retrieve()
 					   .body(QueryBatch.class);
 			
@@ -73,7 +72,6 @@ public class RestClientChatRetriever implements ChatRetriever {
 			var result = restClient.post()
 					   			   .uri(ub->ub.path(BRIDGE_COMMAND_PATH)
 					   					   	  .build())
-					   			   .header("Authorization", "Bearer " + "9cfae89ac504066a9bdc2368970b552acbe7cea66caea5f7f6d0cb5ffa8a9b11")
 					   			   .body(bridgeCommand)
 					   			   .retrieve()
 					   			   .body(CommandResponse.class);
