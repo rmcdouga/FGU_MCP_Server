@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 import org.jspecify.annotations.*;
 
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.QueryId;
+
 public interface ChatRetriever {
 	public record BridgeStatus(
 	        String version,
@@ -147,7 +149,7 @@ public interface ChatRetriever {
 
 	        public static final class Builder {
 	            private String action;
-	            private String queryId;
+	            private QueryId queryId;
 	            private String text;
 	            private boolean spoilerFree;
 	            private boolean hostOnly;
@@ -161,7 +163,7 @@ public interface ChatRetriever {
 	                return this;
 	            }
 
-	            public Builder queryId(String queryId) {
+	            public Builder queryId(QueryId queryId) {
 	                this.queryId = queryId;
 	                return this;
 	            }
@@ -187,7 +189,7 @@ public interface ChatRetriever {
 	            }
 
 	            public Command build() {
-	                return new Command(action, queryId, text, spoilerFree, hostOnly, statusError);
+	                return new Command(action, queryId.toString(), text, spoilerFree, hostOnly, statusError);
 	            }
 	        }
 	    }
