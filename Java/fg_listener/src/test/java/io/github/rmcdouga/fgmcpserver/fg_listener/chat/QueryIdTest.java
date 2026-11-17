@@ -21,7 +21,7 @@ class QueryIdTest {
 		var queryId = QueryId.fromString(queryIdString);
 		
 		// Assert
-		assertThat(queryId.sessionId()).isEqualTo(expectedSessionId);
+		assertThat(queryId.sessionId()).isEqualTo(SessionId.fromString(expectedSessionId));
 		assertThat(queryId.queryType()).isEqualTo(expectedQueryType);
 		assertThat(queryId.queryNumber()).isEqualTo(expectedQueryNumber);
 	}
@@ -53,7 +53,7 @@ class QueryIdTest {
 	})
 	void testAsString(String sessionId, QueryType queryType, Integer queryNumber, String expectedQueryIdString) {
 		// Arrange
-		var queryId = new QueryId(sessionId, queryType, queryNumber);
+		var queryId = new QueryId(SessionId.fromString(sessionId), queryType, queryNumber);
 		
 		// Act
 		var result = queryId.asString();

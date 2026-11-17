@@ -2,7 +2,7 @@ package io.github.rmcdouga.fgmcpserver.fg_listener.chat;
 
 import java.util.Optional;
 
-public record QueryId(String sessionId, QueryType queryType, Integer queryNumber) {
+public record QueryId(SessionId sessionId, QueryType queryType, Integer queryNumber) {
 	public enum QueryType {
 		Chat,
 		Command,
@@ -38,10 +38,10 @@ public record QueryId(String sessionId, QueryType queryType, Integer queryNumber
 		if (queryNumber < 0) {
 			throw new IllegalArgumentException("Query number cannot be negative in query ID string: " + queryIdString);
 		}
-		return new QueryId(sessionId, queryType, queryNumber);
+		return new QueryId(SessionId.fromString(sessionId), queryType, queryNumber);
 	}
 
 	public String asString() {
-		return sessionId + ":" + queryType.asString() + ":" + queryNumber.toString();
+		return sessionId.asString() + ":" + queryType.asString() + ":" + queryNumber.toString();
 	}
 }

@@ -33,9 +33,11 @@ public class AiChatProcessor {
 	}
 	
 	public void startProcessing() {
+		// TODO: Initialize ListenerState (not implemented yet)
+		var listenerState = new ListenerState();
 		while (!stopProcessing) {
 			chatRetriever.pollForChatEvents(cursor, WAIT_TIME)
-					     .ifPresent(msg->run(msg));
+					     .ifPresent(msg->run(msg, listenerState));
 		}
 	}
 	
@@ -46,10 +48,11 @@ public class AiChatProcessor {
 	}
 	
 	
-	private void run(QueryBatch queryBatch) {
+	private void run(QueryBatch queryBatch, ListenerState listenerState) {
 		for (var query : queryBatch.queries()) {
 			log.info("Processing chat message: " + query.request().question());
 		}
+		// TODO: Update the listener state with the new cursor position after processing the batch.
 		cursor = queryBatch.cursor();
 	}
 	

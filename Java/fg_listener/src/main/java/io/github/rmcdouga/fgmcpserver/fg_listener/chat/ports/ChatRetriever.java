@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.jspecify.annotations.*;
 
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.QueryId;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.SessionId;
 
 public interface ChatRetriever {
 	public record BridgeStatus(
@@ -14,7 +15,7 @@ public interface ChatRetriever {
 	        Integer protocol,
 	        String serverEpoch,
 	        Boolean connected,
-	        String session,
+	        SessionId session,
 	        @Nullable Double lastSeenSeconds,
 	        Context context,
 	        Integer pendingCommands,

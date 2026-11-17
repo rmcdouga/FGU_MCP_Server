@@ -29,6 +29,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import io.github.rmcdouga.fgmcpserver.fg_listener.ConfigJson;
 import io.github.rmcdouga.fgmcpserver.fg_listener.FgListenerApplication;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.QueryId;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.SessionId;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.BridgeCommand;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.BridgeCommand.Command;
@@ -254,7 +255,7 @@ class RestClientChatRetrieverTest {
 				() -> assertEquals(2, status.protocol()),
 				() -> assertEquals("05d33dc6d778bf31d224df64", status.serverEpoch()),
 				() -> assertTrue(status.connected()),
-				() -> assertEquals("1794511555-305799", status.session()),
+				() -> assertEquals(SessionId.fromString("1794511555-305799"), status.session()),
 				() -> assertEquals(2.05, status.lastSeenSeconds()),
 				() -> assertEquals("5E", status.context().ruleset()),
 				() -> assertTrue(status.context().host()),
@@ -286,7 +287,7 @@ class RestClientChatRetrieverTest {
 				() -> assertEquals(2, status.protocol()),
 				() -> assertEquals("edd009ed1bd08b53cffc72f1", status.serverEpoch()),
 				() -> assertFalse(status.connected()),
-				() -> assertEquals("", status.session()),
+				() -> assertEquals(SessionId.fromString(""), status.session()),
 				() -> assertNull(status.lastSeenSeconds()),
 				() -> assertNull(status.context().ruleset()),
 				() -> assertNull(status.context().host()),
