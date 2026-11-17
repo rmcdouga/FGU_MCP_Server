@@ -24,7 +24,7 @@ public record QueryId(String sessionId, QueryType queryType, Integer queryNumber
 		}
 	}
 
-	static QueryId fromString(String queryIdString) {
+	public static QueryId fromString(String queryIdString) {
 		var parts = queryIdString.split(":");
 		if (parts.length != 3) {
 			throw new IllegalArgumentException("Invalid query ID string: " + queryIdString);

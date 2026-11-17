@@ -75,7 +75,7 @@ public interface ChatRetriever {
 
 	    /** The per-query request fields supplied by the server. */
 	    public record ChatRequest(
-	            String queryId,
+	            QueryId queryId,
 	            String question,
 	            String sender,
 	            String requesterRole,
