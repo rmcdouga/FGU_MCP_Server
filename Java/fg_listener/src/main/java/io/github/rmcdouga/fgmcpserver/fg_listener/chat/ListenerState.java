@@ -3,6 +3,7 @@ package io.github.rmcdouga.fgmcpserver.fg_listener.chat;
 import java.util.List;
 import java.util.Map;
 
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.CursorLocation;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.QueryId;
 
 // This is placeholder for the state of the listener.  
@@ -11,7 +12,7 @@ import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.QueryId;
 public class ListenerState {
     List<String> identity;
 	String campaign;
-	Integer cursor;
+	CursorLocation cursor;
     List<Job> jobs;
 	
 	public class Job {

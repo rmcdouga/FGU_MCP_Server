@@ -50,7 +50,11 @@ public class AiChatProcessor {
 	
 	private void run(QueryBatch queryBatch, ListenerState listenerState) {
 		for (var query : queryBatch.queries()) {
+			// Update the status of each chat message to "processing" in the listener state.
 			log.info("Processing chat message: " + query.request().question());
+			// Update the status of each chat message to "posting" in the listener state.
+			// Post the response back to the bridge using the chatRetriever.
+			// Update the status of each chat message to "done" in the listener state.
 		}
 		// TODO: Update the listener state with the new cursor position after processing the batch.
 		cursor = queryBatch.cursor();
