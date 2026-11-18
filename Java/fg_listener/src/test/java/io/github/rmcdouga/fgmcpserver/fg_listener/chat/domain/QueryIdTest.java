@@ -1,4 +1,4 @@
-package io.github.rmcdouga.fgmcpserver.fg_listener.chat;
+package io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import io.github.rmcdouga.fgmcpserver.fg_listener.chat.QueryId.QueryType;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.QueryId.QueryType;
 
 class QueryIdTest {
 
@@ -23,7 +23,7 @@ class QueryIdTest {
 		// Assert
 		assertThat(queryId.sessionId()).isEqualTo(SessionId.fromString(expectedSessionId));
 		assertThat(queryId.queryType()).isEqualTo(expectedQueryType);
-		assertThat(queryId.queryNumber()).isEqualTo(expectedQueryNumber);
+		assertThat(queryId.cursorLocation()).isEqualTo(CursorLocation.fromInteger(expectedQueryNumber));
 	}
 
 	@ParameterizedTest
@@ -51,9 +51,9 @@ class QueryIdTest {
 		"session1,Chat,1,session1:chat:1",
 		"session2,Command,42,session2:command:42"
 	})
-	void testAsString(String sessionId, QueryType queryType, Integer queryNumber, String expectedQueryIdString) {
+	void testAsString(String sessionId, QueryType queryType, Integer cursorLocation, String expectedQueryIdString) {
 		// Arrange
-		var queryId = new QueryId(SessionId.fromString(sessionId), queryType, queryNumber);
+		var queryId = new QueryId(SessionId.fromString(sessionId), queryType, CursorLocation.fromInteger(cursorLocation));
 		
 		// Act
 		var result = queryId.asString();

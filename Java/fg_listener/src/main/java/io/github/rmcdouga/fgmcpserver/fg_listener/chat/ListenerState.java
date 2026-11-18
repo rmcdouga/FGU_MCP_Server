@@ -3,6 +3,8 @@ package io.github.rmcdouga.fgmcpserver.fg_listener.chat;
 import java.util.List;
 import java.util.Map;
 
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.QueryId;
+
 // This is placeholder for the state of the listener.  
 // It will be used to restart processing if the listener shuts down and is restarted.
 // This functionality has not yet been implemented.

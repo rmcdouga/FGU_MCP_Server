@@ -28,8 +28,8 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 
 import io.github.rmcdouga.fgmcpserver.fg_listener.ConfigJson;
 import io.github.rmcdouga.fgmcpserver.fg_listener.FgListenerApplication;
-import io.github.rmcdouga.fgmcpserver.fg_listener.chat.QueryId;
-import io.github.rmcdouga.fgmcpserver.fg_listener.chat.SessionId;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.QueryId;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.SessionId;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.BridgeCommand;
 import io.github.rmcdouga.fgmcpserver.fg_listener.chat.ports.ChatRetriever.BridgeCommand.Command;

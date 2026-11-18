@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import io.github.rmcdouga.fgmcpserver.fg_listener.chat.SessionId;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.SessionId;
 
 class ChatRetrieverTest {
 

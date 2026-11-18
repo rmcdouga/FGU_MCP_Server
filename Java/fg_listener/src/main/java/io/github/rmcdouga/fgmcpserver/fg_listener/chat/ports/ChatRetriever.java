@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 import org.jspecify.annotations.*;
 
-import io.github.rmcdouga.fgmcpserver.fg_listener.chat.QueryId;
-import io.github.rmcdouga.fgmcpserver.fg_listener.chat.SessionId;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.QueryId;
+import io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain.SessionId;
 
 public interface ChatRetriever {
 	public record BridgeStatus(

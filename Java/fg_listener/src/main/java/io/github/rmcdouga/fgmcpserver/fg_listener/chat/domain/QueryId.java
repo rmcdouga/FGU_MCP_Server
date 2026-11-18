@@ -1,8 +1,8 @@
-package io.github.rmcdouga.fgmcpserver.fg_listener.chat;
+package io.github.rmcdouga.fgmcpserver.fg_listener.chat.domain;
 
 import java.util.Optional;
 
-public record QueryId(SessionId sessionId, QueryType queryType, Integer queryNumber) {
+public record QueryId(SessionId sessionId, QueryType queryType, CursorLocation cursorLocation) {
 	public enum QueryType {
 		Chat,
 		Command,
@@ -34,14 +34,14 @@ public record QueryId(SessionId sessionId, QueryType queryType, Integer queryNum
 			throw new IllegalArgumentException("Session ID cannot be empty in query ID string: " + queryIdString);
 		}
 		var queryType = QueryType.fromString(parts[1]).orElseThrow(()->new IllegalArgumentException("Invalid query type: " + parts[1]));
-		var queryNumber = Integer.parseInt(parts[2]);
-		if (queryNumber < 0) {
+		var cursorLocation = Integer.parseInt(parts[2]);
+		if (cursorLocation < 0) {
 			throw new IllegalArgumentException("Query number cannot be negative in query ID string: " + queryIdString);
 		}
-		return new QueryId(SessionId.fromString(sessionId), queryType, queryNumber);
+		return new QueryId(SessionId.fromString(sessionId), queryType, CursorLocation.fromInteger(cursorLocation));
 	}
 
 	public String asString() {
-		return sessionId.asString() + ":" + queryType.asString() + ":" + queryNumber.toString();
+		return sessionId.asString() + ":" + queryType.asString() + ":" + cursorLocation.asString();
 	}
 }
