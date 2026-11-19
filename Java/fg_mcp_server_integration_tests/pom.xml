@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.1</version>
+		<version>4.1.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.github.rmcdouga.fgmcpserver_integ_tests</groupId>
@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
-		<spring-ai.version>2.0.1</spring-ai.version>
+		<spring-ai.version>2.0.2</spring-ai.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -42,12 +42,12 @@
 		<dependency>
 			<groupId>org.modeljars</groupId>
 			<artifactId>modeljars</artifactId>
-			<version>0.1.31</version>
+			<version>0.1.77</version>
 		</dependency>
 		<dependency>
 			<groupId>com.integrallis</groupId>
 			<artifactId>models-spring-ai</artifactId>
-			<version>0.3.26</version>
+			<version>0.5.17</version>
 		</dependency>
 		<dependency>
 			<groupId>org.modeljars.huggingface</groupId>
